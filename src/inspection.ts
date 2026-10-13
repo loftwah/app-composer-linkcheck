@@ -57,12 +57,12 @@ export function metadata(html:string,url:string,headerRobots='') {
  check('Description',!!first('description'),first('description'),'Add a concise page-specific description. Search engines may choose another snippet.');
  check('Canonical URL',canonicals.length===1&&/^https:\/\//.test(canonicals[0]),canonicals[0]||'','Publish one absolute HTTPS canonical.');
  if(canonicals[0]&&canonicals[0]!==url)findings.push({status:'review',label:'Canonical destination',detail:'The declared canonical differs from the inspected URL. Confirm that this duplication is intentional.'});
- for(const key of ['og:title','og:type','og:url','og:image'])check(key,!!first(key),first(key),`Add ${key} to the server-rendered head.`);
+ for(const key of ['og:title','og:type','og:url','og:image']){const value=key==='og:image'?first(key)||first('og:image:url'):first(key);check(key,!!value,value,`Add ${key} to the server-rendered head.`);}
  check('Image description',!!first('og:image:alt'),first('og:image:alt'),'Describe the image using og:image:alt.');
  check('Language',!!lang,lang,'Declare the page language on the html element.');
  check('Mobile viewport',!!first('viewport'),first('viewport'),'Add a mobile viewport declaration.');
  check('Main heading',h1===1,`${h1} h1 element`,`${h1} h1 elements found. Review the visible page hierarchy.`);
- const robots=[first('robots'),headerRobots].filter(Boolean).join('; ');
+ const robots=[...(tags['robots']||[]),...(tags['googlebot']||[]).map(v=>'googlebot: '+v),...(tags['bingbot']||[]).map(v=>'bingbot: '+v),headerRobots].filter(Boolean).join('; ');
  findings.push({status:/\b(noindex|none)\b/i.test(robots)?'review':'pass',label:'Indexing directive',detail:robots||'No noindex directive in the response. This does not prove robots.txt access or search indexing.'});
  for(const [key,values] of Object.entries(tags))if(values.length>1&&key!=='og:image'&&key!=='og:locale:alternate')findings.push({status:'review',label:`Repeated ${key}`,detail:'More than one value was found. Check for conflicting template defaults.'});
  const structured=jsonld.map(text=>{try{const value=JSON.parse(text);return {valid:true,type:value['@type']||'JSON document'};}catch{return {valid:false,type:'Invalid JSON'};}});
