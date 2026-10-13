@@ -1,7 +1,8 @@
+import {health,publish,pageEvent,type PublisherEnv} from "./publisher.mjs";
 import { Effect } from "effect";
 import { inspect, hosts } from "./inspection.ts";
 import { sha } from "./build.ts";
-type Env = { ASSETS: Fetcher; INSPECTION_LIMIT: RateLimit };
+type Env = PublisherEnv & { ASSETS: Fetcher; INSPECTION_LIMIT: RateLimit };
 const json = (data: unknown, status = 200) =>
   Response.json(data, {
     status,
@@ -10,8 +11,8 @@ const json = (data: unknown, status = 200) =>
       "X-Content-Type-Options": "nosniff",
     },
   });
-export default {
-  async fetch(request: Request, env: Env) {
+const app = {
+  async fetch(request: Request, env: Env, context: ExecutionContext) {
     const url = new URL(request.url);
     if (
       request.method !== "GET" &&
@@ -87,7 +88,7 @@ export default {
       return Effect.runPromise(
         inspect(value, fetch, { discovery }).pipe(
           Effect.match({
-            onSuccess: (report) => json({ sourceSha: sha, ...report }),
+            onSuccess: (report) => {publish(env,context,request,'inspection_completed');return json({ sourceSha: sha, ...report });},
             onFailure: (error) =>
               json(
                 { error: error.message, kind: error._tag },
@@ -113,3 +114,8 @@ export default {
     return new Response(asset.body, { status: asset.status, headers });
   },
 };
+
+export default {async fetch(request:Request,env:Env,context:ExecutionContext){
+ const probe=health(request,'/healthz','linkcheck',sha);if(probe)return probe;
+ const response=await app.fetch(request,env,context);if(pageEvent(request,response)==='app_open')publish(env,context,request,'app_open');return response;
+}};
