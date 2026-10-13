@@ -35,6 +35,8 @@
     <meta name="theme-color" content="#17181b" />
     <link rel="stylesheet" href="/style.css" />
     <script src="/app.js" defer></script>
+    <link rel="stylesheet" href="/navigation.css" />
+    <script src="/navigation.js" defer></script>
   </head>
   <body>
     <a class="skip" href="#main">Skip to content</a>
@@ -44,12 +46,69 @@
           >Link Check<small>App Composer</small></span
         ></a
       >
-      <nav aria-label="Main">
+      <nav aria-label="Main" class="app-tools">
         <a href="https://composer.loftwah.com/apps">All apps</a
         ><a href="https://github.com/loftwah/app-composer-linkcheck">Source</a
+        ><button
+          type="button"
+          class="secondary"
+          data-open-apps
+          aria-haspopup="dialog"
+        >
+          Apps <kbd>⌘K / Ctrl K</kbd></button
         ><button id="theme" class="secondary" type="button">Light mode</button>
       </nav>
     </header>
+    <dialog id="app-navigation" aria-labelledby="app-navigation-title">
+      <div class="dialog-heading">
+        <h2 id="app-navigation-title">Apps and shortcuts</h2>
+        <button type="button" data-close-apps>Close</button>
+      </div>
+      <label
+        >Find an app or task<input
+          type="search"
+          placeholder="App name, Get Ready, Init…"
+          autocomplete="off"
+      /></label>
+      <p role="status" aria-live="polite"></p>
+      <ul>
+        <li data-destination>
+          <a href="https://guestbook.loftwah.com"
+            >Here / there<small>Photo guestbook</small></a
+          >
+        </li>
+        <li data-destination>
+          <a href="https://showcase.loftwah.com"
+            >Top shelf<small>Curated collection</small></a
+          >
+        </li>
+        <li data-destination>
+          <a href="https://share.loftwah.com"
+            >Link Check<small>SEO and sharing</small></a
+          >
+        </li>
+        <li data-destination>
+          <a href="https://ready.loftwah.com"
+            >Hello World<small>Deployment reference</small></a
+          >
+        </li>
+        <li data-destination>
+          <a href="https://ai.loftwah.com"
+            >Portable AI State<small>Fictional encrypted assistant</small></a
+          >
+        </li>
+        <li data-destination>
+          <a href="https://composer.loftwah.com/ready"
+            >Get Ready<small>Composer task</small></a
+          >
+        </li>
+        <li data-destination>
+          <a href="https://composer.loftwah.com/init"
+            >Init<small>Composer task</small></a
+          >
+        </li>
+      </ul>
+    </dialog>
     <main id="main">
       <section class="intro">
         <h1>Check how your site shows up.</h1>
