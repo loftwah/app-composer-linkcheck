@@ -1,6 +1,6 @@
 import { Effect } from "effect";
-import { inspect, hosts } from "./inspection";
-import { sha } from "./build";
+import { inspect, hosts } from "./inspection.ts";
+import { sha } from "./build.ts";
 type Env = { ASSETS: Fetcher; INSPECTION_LIMIT: RateLimit };
 const json = (data: unknown, status = 200) =>
   Response.json(data, {
@@ -97,11 +97,16 @@ export default {
     }
     const asset = await env.ASSETS.fetch(request);
     const headers = new Headers(asset.headers);
+    const nonce = btoa(
+      String.fromCharCode(...crypto.getRandomValues(new Uint8Array(16))),
+    );
+    if (headers.get("content-type")?.startsWith("text/html"))
+      headers.set("Cache-Control", "private, no-store");
     headers.set("X-Content-Type-Options", "nosniff");
     headers.set("Referrer-Policy", "no-referrer");
     headers.set(
       "Content-Security-Policy",
-      "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' https://composer.loftwah.com https://guestbook.loftwah.com https://showcase.loftwah.com https://ready.loftwah.com https://ai.loftwah.com https://share.loftwah.com; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'",
+      `default-src 'self'; script-src 'self' 'nonce-${nonce}' https://static.cloudflareinsights.com/beacon.min.js; style-src 'self'; img-src 'self' https://composer.loftwah.com https://guestbook.loftwah.com https://showcase.loftwah.com https://ready.loftwah.com https://ai.loftwah.com https://share.loftwah.com; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'`,
     );
     return new Response(asset.body, { status: asset.status, headers });
   },
