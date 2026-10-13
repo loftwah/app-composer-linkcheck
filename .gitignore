@@ -1,0 +1,7 @@
+node_modules/
+.wrangler/
+dist/
+.private/
+.env*
+src/build.ts
+.playwright-cli/
