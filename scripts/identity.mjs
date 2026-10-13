@@ -1,1 +1,6 @@
-import{execFileSync}from'node:child_process';import{writeFileSync}from'node:fs';const sha=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();writeFileSync('src/build.ts',`export const sha = '${sha}';\n`);
+import { execFileSync } from "node:child_process";
+import { writeFileSync } from "node:fs";
+const sha = execFileSync("git", ["rev-parse", "HEAD"], {
+  encoding: "utf8",
+}).trim();
+writeFileSync("src/build.ts", `export const sha = '${sha}';\n`);

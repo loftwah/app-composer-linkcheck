@@ -1,1 +1,285 @@
-<!doctype html><html lang="en" data-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Link Check · Inspect your social preview</title><meta name="description" content="Inspect live Open Graph and SEO metadata, verify image dimensions and export a dated report for your agent."><link rel="canonical" href="https://share.loftwah.com/"><meta property="og:type" content="website"><meta property="og:title" content="Link Check"><meta property="og:description" content="Inspect the page before you share it."><meta property="og:url" content="https://share.loftwah.com/"><meta property="og:image" content="https://composer.loftwah.com/brand/share-ai-v1.jpg"><meta property="og:image:alt" content="App Composer’s orange and charcoal interlocking frames."><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://composer.loftwah.com/brand/share-ai-v1.jpg"><link rel="icon" type="image/svg+xml" href="/icon.svg"><link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script></head><body><a class="skip" href="#main">Skip to content</a><header><a class="brand" href="/">Link Check<span>by App Composer</span></a><nav aria-label="Main"><a href="https://composer.loftwah.com/apps">All apps</a><a href="https://github.com/loftwah/app-composer-linkcheck">Source</a><button id="theme" class="secondary" type="button">Light mode</button></nav></header><main id="main"><h1>Inspect the page <br>before you share it.</h1><p class="lede">Check its live metadata and image files. See what needs fixing, then take the report to your agent.</p><form id="inspect"><label for="url">Public page URL</label><div class="input-row"><input id="url" type="url" required value="https://composer.loftwah.com/" aria-describedby="supported"><button id="submit">Inspect page</button></div><p id="supported" class="small">This deployment checks Composer, Guestbook, Showcase, Hello World, Portable AI State and Link Check. A fork can configure its own reviewed public hosts.</p></form><p id="status" role="status" aria-live="polite"></p><div id="report" hidden><div class="report-heading"><div><h2 id="report-title">Inspection</h2><p id="checked" class="small"></p></div><button id="export" class="secondary">Export report</button></div><div class="workbench"><section aria-label="Page findings"><h2>Page checks</h2><ul id="findings" class="findings"></ul><details><summary>Raw metadata and inspection limits</summary><pre id="raw"></pre></details></section><section class="preview-workspace"><h2>Preview workbench</h2><label for="platform">Preview shape<select id="platform"><option value="og">Open Graph / LinkedIn</option><option value="x">X / Twitter</option><option value="chat">Messaging compact</option><option value="search">Search result</option></select></label><p class="small">Approximate layout from the fetched tags. Platform caching, eligibility and the actual unfurl are not verified here.</p><div id="preview" class="preview"><img id="preview-image" alt="" hidden><div><p id="preview-host" class="small"></p><h3 id="preview-title"></h3><p id="preview-description"></p></div></div><p id="image-proof" class="small"></p><p id="image-dimensions" class="small"></p></section></div><section class="guidance"><h2>What each platform still needs</h2><p class="small">Guidance review: 13 October 2026. These source checks are separate from this page’s inspection date. No platform-native sharing action has been performed.</p><div><h3>Open Graph</h3><p>Title, type, image and URL are required. Give the image a description. Multiple images are allowed; the first takes preference. <a href="https://ogp.me/">Protocol</a> — reviewed.</p><h3>LinkedIn</h3><p>Its help page describes a 1.91:1 frame, 1200 × 627. Old images can remain cached; use Post Inspector to refresh and check the actual result. <a href="https://www.linkedin.com/help/linkedin/answer/a525301">Guidance</a> — reviewed. <a id="linkedin-debug" href="https://www.linkedin.com/post-inspector/">Open Post Inspector</a>.</p><h3>X / Twitter</h3><p>Inspect twitter:card, twitter:image and their alternative text separately. The former official large-card documentation redirected to the general API overview during this review. Current size/eligibility rules are unverified; this preview does not claim X acceptance. <a href="https://docs.x.com/overview">Current documentation destination</a>.</p><h3>Facebook</h3><p>Use its Sharing Debugger for actual crawler access and cached image checks. The official best-practices page returned HTTP 429 during review; current platform-specific limits are unverified. <a id="facebook-debug" href="https://developers.facebook.com/tools/debug/">Open Sharing Debugger</a>.</p><h3>Slack</h3><p>Classic unfurls use page metadata. Workspace settings and app-provided unfurls can change what appears. <a href="https://docs.slack.dev/messaging/unfurling-links-in-messages/">Official guide</a> — reviewed.</p><h3>Discord, WhatsApp &amp; iMessage</h3><p>The compact preview is a layout check only. Platform-specific crawler, cache and crop behavior remains unverified. Confirm by sharing a public test link in each relevant client; no automatic post is sent.</p><h3>Search</h3><p>A title, description and canonical help describe the page. Google can choose different title text and snippets. Indexing, robots.txt, structured-data eligibility and rankings are separate checks. <a href="https://developers.google.com/search/docs/appearance/title-link">Google title guidance</a> — reviewed.</p></div></section></div><section class="closing"><h2>Keep the evidence.</h2><p>Your report records the response, image dimensions, source version and inspection time. It grants no account or deployment access. The checker makes no model calls and does not execute page scripts or save reports on a server.</p><a href="https://composer.loftwah.com/ready">Prepare your agent</a></section></main><footer>Independent mini-app · MIT · <a href="/manifest.json">Machine-readable contract</a></footer></body></html>
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Link Check · Site identity, SEO and share previews</title>
+    <meta
+      name="description"
+      content="Inspect live Open Graph and SEO metadata, verify image dimensions and export a dated report for your agent."
+    />
+    <link rel="canonical" href="https://share.loftwah.com/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Link Check" />
+    <meta
+      property="og:description"
+      content="Inspect the page before you share it."
+    />
+    <meta property="og:url" content="https://share.loftwah.com/" />
+    <meta
+      property="og:image"
+      content="https://composer.loftwah.com/brand/share-ai-v1.jpg"
+    />
+    <meta
+      property="og:image:alt"
+      content="App Composer’s orange and charcoal interlocking frames."
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:image"
+      content="https://composer.loftwah.com/brand/share-ai-v1.jpg"
+    />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <meta name="theme-color" content="#17181b" />
+    <link rel="stylesheet" href="/style.css" />
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header>
+      <a class="brand" href="/"
+        ><img src="/icon.svg" width="36" height="36" alt="" /><span
+          >Link Check<small>App Composer</small></span
+        ></a
+      >
+      <nav aria-label="Main">
+        <a href="https://composer.loftwah.com/apps">All apps</a
+        ><a href="https://github.com/loftwah/app-composer-linkcheck">Source</a
+        ><button id="theme" class="secondary" type="button">Light mode</button>
+      </nav>
+    </header>
+    <main id="main">
+      <section class="intro">
+        <h1>Check how your site shows up.</h1>
+        <p>
+          Inspect its identity, search metadata and share images. Keep a dated
+          report for your agent.
+        </p>
+      </section>
+      <form id="inspect">
+        <label for="url">Public page URL</label>
+        <div class="input-row">
+          <input
+            id="url"
+            type="url"
+            required
+            value="https://composer.loftwah.com/"
+            aria-describedby="supported"
+          /><button id="submit">Inspect page</button>
+        </div>
+        <details id="supported">
+          <summary>Supported sites and inspection limits</summary>
+          <p>
+            This deployment checks Composer, Guestbook, Showcase, Hello World,
+            Portable AI State and Link Check. A fork can configure its own
+            reviewed public hosts. It reads public HTML and bounded image files
+            without executing scripts.
+          </p>
+        </details>
+      </form>
+      <p id="status" role="status" aria-live="polite"></p>
+      <section id="empty" class="empty">
+        <div>
+          <h2>A link is more than its URL.</h2>
+          <p>
+            See the page title, favicon and share image together. Find missing
+            or conflicting metadata before you send the link.
+          </p>
+          <ul>
+            <li>Site icons and browser theme colour</li>
+            <li>Open Graph, X and compact previews</li>
+            <li>Canonical, indexing directives and JSON-LD</li>
+          </ul>
+          <p class="small">
+            The preview uses the fetched tags. Search indexing and platform
+            acceptance need separate checks.
+          </p>
+        </div>
+        <figure>
+          <img
+            src="/composer-art.jpg"
+            width="1200"
+            height="630"
+            alt="App Composer’s orange and charcoal square frames joined together."
+          />
+          <figcaption>
+            App Composer’s generated share artwork. Inspect a page to see its
+            own preview.
+          </figcaption>
+        </figure>
+      </section>
+      <div id="report" hidden>
+        <div class="report-heading">
+          <div>
+            <h2 id="report-title">Inspection</h2>
+            <p id="checked" class="small"></p>
+          </div>
+          <button id="export" class="secondary">Export report</button>
+        </div>
+        <div class="workbench">
+          <section class="identity">
+            <h2>Site identity</h2>
+            <div class="site-heading">
+              <img
+                id="site-icon"
+                width="56"
+                height="56"
+                alt="Inspected site icon"
+                hidden
+              />
+              <div>
+                <h3 id="site-title"></h3>
+                <p id="site-host" class="small"></p>
+              </div>
+            </div>
+            <p id="site-description"></p>
+            <dl id="site-details"></dl>
+            <div id="icon-evidence" class="icon-evidence"></div>
+            <p id="summary-count" class="summary-count"></p>
+            <a href="#page-checks">Review page checks</a>
+          </section>
+          <section class="preview-workspace">
+            <div class="preview-heading">
+              <h2>Share preview</h2>
+              <label for="platform"
+                >Preview shape<select id="platform">
+                  <option value="og">Open Graph / LinkedIn</option>
+                  <option value="x">X / Twitter</option>
+                  <option value="chat">Messaging compact</option>
+                  <option value="search">Search result</option>
+                </select></label
+              >
+            </div>
+            <div id="preview" class="preview">
+              <img id="preview-image" alt="" hidden />
+              <div>
+                <p id="preview-host" class="small"></p>
+                <h3 id="preview-title"></h3>
+                <p id="preview-description"></p>
+              </div>
+            </div>
+            <p id="image-dimensions" class="image-dimensions"></p>
+            <p id="image-proof" class="small"></p>
+            <p class="small">
+              Approximate layout. Platform caching and actual unfurls are not
+              verified here.
+            </p>
+          </section>
+        </div>
+        <section id="page-checks" class="page-checks">
+          <h2>Page checks</h2>
+          <p id="no-problems" hidden>
+            No required page checks need fixing. Review optional metadata and
+            image evidence below.
+          </p>
+          <ul id="findings" class="findings"></ul>
+          <details class="passed">
+            <summary id="passed-label">Checks passed</summary>
+            <ul id="passed-findings" class="findings"></ul>
+          </details>
+          <details>
+            <summary>Raw metadata and inspection limits</summary>
+            <pre id="raw"></pre>
+          </details>
+        </section>
+        <details class="guidance">
+          <summary>Platform guidance and remaining checks</summary>
+          <p class="small">
+            Guidance review: 13 October 2026. These source checks are separate
+            from this page’s inspection date. No platform-native sharing action
+            has been performed.
+          </p>
+          <div>
+            <h3>Open Graph</h3>
+            <p>
+              Title, type, image and URL are required. Give the image a
+              description. Multiple images are allowed; the first takes
+              preference. <a href="https://ogp.me/">Protocol</a> — reviewed.
+            </p>
+            <h3>LinkedIn</h3>
+            <p>
+              Its help page describes a 1.91:1 frame, 1200 × 627. Old images can
+              remain cached; use Post Inspector to refresh and check the actual
+              result.
+              <a href="https://www.linkedin.com/help/linkedin/answer/a525301"
+                >Guidance</a
+              >
+              — reviewed.
+              <a
+                id="linkedin-debug"
+                href="https://www.linkedin.com/post-inspector/"
+                >Open Post Inspector</a
+              >.
+            </p>
+            <h3>X / Twitter</h3>
+            <p>
+              Inspect twitter:card, twitter:image and their alternative text
+              separately. The former official large-card documentation
+              redirected to the general API overview during this review. Current
+              size/eligibility rules are unverified; this preview does not claim
+              X acceptance.
+              <a href="https://docs.x.com/overview"
+                >Current documentation destination</a
+              >.
+            </p>
+            <h3>Facebook</h3>
+            <p>
+              Use its Sharing Debugger for actual crawler access and cached
+              image checks. The official best-practices page returned HTTP 429
+              during review; current platform-specific limits are unverified.
+              <a
+                id="facebook-debug"
+                href="https://developers.facebook.com/tools/debug/"
+                >Open Sharing Debugger</a
+              >.
+            </p>
+            <h3>Slack</h3>
+            <p>
+              Classic unfurls use page metadata. Workspace settings and
+              app-provided unfurls can change what appears.
+              <a
+                href="https://docs.slack.dev/messaging/unfurling-links-in-messages/"
+                >Official guide</a
+              >
+              — reviewed.
+            </p>
+            <h3>Discord, WhatsApp &amp; iMessage</h3>
+            <p>
+              The compact preview is a layout check only. Platform-specific
+              crawler, cache and crop behavior remains unverified. Confirm by
+              sharing a public test link in each relevant client; no automatic
+              post is sent.
+            </p>
+            <h3>Search</h3>
+            <p>
+              A title, description and canonical help describe the page. Google
+              can choose different title text and snippets. Indexing,
+              robots.txt, structured-data eligibility and rankings are separate
+              checks.
+              <a
+                href="https://developers.google.com/search/docs/appearance/title-link"
+                >Google title guidance</a
+              >
+              — reviewed.
+            </p>
+          </div>
+        </details>
+      </div>
+      <footer>
+        <p>
+          Independent mini-app · MIT ·
+          <a href="/manifest.json">App contract</a> ·
+          <a href="https://composer.loftwah.com/review"
+            >Review a report in Composer</a
+          >
+        </p>
+        <p>
+          Reports stay in your browser. No accounts, model calls or server
+          report storage.
+        </p>
+      </footer>
+    </main>
+  </body>
+</html>
