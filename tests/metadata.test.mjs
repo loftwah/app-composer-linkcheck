@@ -64,3 +64,32 @@ test("the official og:image:url alias is accepted consistently", () => {
     "pass",
   );
 });
+
+test("equivalent origin canonicals avoid false duplicate warnings while distinct paths and malformed URLs remain findings", () => {
+  const input = (canonical) =>
+    html.replace('href="https://composer.loftwah.com/"', `href="${canonical}"`);
+  const equivalent = metadata(
+    input("https://COMPOSER.loftwah.com:443"),
+    "https://composer.loftwah.com/",
+  );
+  assert.equal(
+    equivalent.findings.some((f) => f.label === "Canonical destination"),
+    false,
+  );
+  const distinct = metadata(
+    input("https://composer.loftwah.com/apps"),
+    "https://composer.loftwah.com/",
+  );
+  assert.equal(
+    distinct.findings.some((f) => f.label === "Canonical destination"),
+    true,
+  );
+  const malformed = metadata(
+    input("https://"),
+    "https://composer.loftwah.com/",
+  );
+  assert.equal(
+    malformed.findings.find((f) => f.label === "Canonical URL").status,
+    "fix",
+  );
+});

@@ -249,13 +249,21 @@ export function metadata(html: string, url: string, headerRobots = "") {
     first("description"),
     "Add a concise page-specific description. Search engines may choose another snippet.",
   );
+  const canonicalDestination = (() => {
+    try {
+      const parsed = new URL(canonicals[0]);
+      return parsed.protocol === "https:" ? parsed.href : null;
+    } catch {
+      return null;
+    }
+  })();
   check(
     "Canonical URL",
-    canonicals.length === 1 && /^https:\/\//.test(canonicals[0]),
+    canonicals.length === 1 && canonicalDestination !== null,
     canonicals[0] || "",
     "Publish one absolute HTTPS canonical.",
   );
-  if (canonicals[0] && canonicals[0] !== url)
+  if (canonicalDestination && canonicalDestination !== new URL(url).href)
     findings.push({
       status: "review",
       label: "Canonical destination",
