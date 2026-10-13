@@ -1,6 +1,7 @@
 import { Data, Effect } from "effect";
 import { Parser } from "htmlparser2";
 import { imageSize } from "image-size";
+import { explain, discoveryChecks, imageFindings } from "./diagnostics.ts";
 
 // Forks change this reviewed source list, never accept host authority from a browser.
 export const hosts = [
@@ -136,6 +137,11 @@ export type Finding = {
   status: "pass" | "fix" | "review";
   label: string;
   detail: string;
+  category?: string;
+  priority?: "high" | "normal" | "low";
+  why?: string;
+  action?: string;
+  source?: string;
 };
 type ImageReport = {
   kind: string;
@@ -162,6 +168,11 @@ export function metadata(html: string, url: string, headerRobots = "") {
     media: string;
   }[] = [];
   const manifests: string[] = [];
+  const headings: { level: number; text: string }[] = [];
+  let activeHeading: { level: number; text: string } | undefined;
+  const contentImages = { total: 0, missingAlt: 0, emptyAlt: 0 };
+  const imageDeclarations: Record<string, string>[] = [];
+  let activeImage: Record<string, string> | undefined;
   let head = false,
     title = false,
     ld = false,
@@ -175,6 +186,14 @@ export function metadata(html: string, url: string, headerRobots = "") {
         if (name === "html") lang = attrs.lang || "";
         if (name === "head") head = true;
         if (name === "h1") h1++;
+        if (!head && /^h[1-6]$/.test(name)) {
+          activeHeading = { level: Number(name[1]), text: "" };
+        }
+        if (!head && name === "img") {
+          contentImages.total++;
+          if (attrs.alt === undefined) contentImages.missingAlt++;
+          else if (!attrs.alt.trim()) contentImages.emptyAlt++;
+        }
         if (!head) return;
         if (name === "title") {
           title = true;
@@ -184,6 +203,13 @@ export function metadata(html: string, url: string, headerRobots = "") {
           const key = (attrs.property || attrs.name || "").toLowerCase();
           if (key && attrs.content !== undefined)
             (tags[key] ??= []).push(attrs.content.slice(0, 4000));
+          if (key === "og:image" || key === "og:image:url") {
+            activeImage = { url: (attrs.content || "").slice(0, 2048) };
+            if (imageDeclarations.length < 10)
+              imageDeclarations.push(activeImage);
+          } else if (key.startsWith("og:image:") && activeImage) {
+            activeImage[key.slice(9)] = (attrs.content || "").slice(0, 4000);
+          }
         }
         if (
           name === "link" &&
@@ -213,9 +239,15 @@ export function metadata(html: string, url: string, headerRobots = "") {
       ontext(text) {
         if (title) titleText += text;
         if (ld) ldText += text;
+        if (activeHeading) activeHeading.text += text.slice(0, 160);
       },
       onclosetag(name) {
         if (name === "head") head = false;
+        if (activeHeading && name === `h${activeHeading.level}`) {
+          activeHeading.text = activeHeading.text.trim().slice(0, 160);
+          if (headings.length < 60) headings.push(activeHeading);
+          activeHeading = undefined;
+        }
         if (name === "title" && title) {
           titles.push(titleText.trim().slice(0, 4000));
           title = false;
@@ -229,7 +261,7 @@ export function metadata(html: string, url: string, headerRobots = "") {
     { decodeEntities: true },
   );
   parser.end(html);
-  const first = (key: string) => tags[key]?.[0] || "";
+  const first = (key: string) => tags[key]?.[0]?.trim() || "";
   const findings: Finding[] = [];
   const check = (label: string, ok: boolean, good: string, bad: string) =>
     findings.push({
@@ -252,7 +284,11 @@ export function metadata(html: string, url: string, headerRobots = "") {
   const canonicalDestination = (() => {
     try {
       const parsed = new URL(canonicals[0]);
-      return parsed.protocol === "https:" ? parsed.href : null;
+      return parsed.protocol === "https:" &&
+        !parsed.username &&
+        !parsed.password
+        ? parsed.href
+        : null;
     } catch {
       return null;
     }
@@ -272,13 +308,13 @@ export function metadata(html: string, url: string, headerRobots = "") {
     });
   for (const key of ["og:title", "og:type", "og:url", "og:image"]) {
     const value =
-      key === "og:image" ? first(key) || first("og:image:url") : first(key);
+      key === "og:image" ? imageDeclarations[0]?.url || "" : first(key);
     check(key, !!value, value, `Add ${key} to the server-rendered head.`);
   }
   check(
     "Image description",
-    !!first("og:image:alt"),
-    first("og:image:alt"),
+    !!imageDeclarations[0]?.alt?.trim(),
+    imageDeclarations[0]?.alt?.trim() || "",
     "Describe the image using og:image:alt.",
   );
   check(
@@ -293,12 +329,76 @@ export function metadata(html: string, url: string, headerRobots = "") {
     first("viewport"),
     "Add a mobile viewport declaration.",
   );
-  check(
-    "Main heading",
-    h1 === 1,
-    `${h1} h1 element`,
-    `${h1} h1 elements found. Review the visible page hierarchy.`,
-  );
+  findings.push({
+    status: h1 === 1 ? "pass" : "review",
+    label: "Main heading",
+    detail: `${h1} h1 elements found. Review the page outline; this count alone is not an accessibility or ranking verdict.`,
+  });
+  if (
+    headings.some((item, i) => i > 0 && item.level > headings[i - 1].level + 1)
+  )
+    findings.push({
+      status: "review",
+      label: "Heading order",
+      detail:
+        "The HTML outline skips a heading level. Check whether sections are nested clearly.",
+    });
+  findings.push({
+    status: contentImages.missingAlt ? "fix" : "pass",
+    label: "Content image descriptions",
+    detail: `${contentImages.total} HTML images; ${contentImages.missingAlt} without alt; ${contentImages.emptyAlt} with empty alt. Empty alt can be correct for decorative images. Text quality and rendered visibility are not evaluated.`,
+  });
+  const ogUrl = first("og:url");
+  if (ogUrl) {
+    try {
+      const parsed = new URL(ogUrl);
+      if (parsed.protocol !== "https:" || parsed.username || parsed.password)
+        throw new Error();
+      findings.push({
+        status:
+          canonicalDestination && parsed.href !== canonicalDestination
+            ? "review"
+            : "pass",
+        label: "Search and share identity",
+        detail:
+          canonicalDestination && parsed.href !== canonicalDestination
+            ? "og:url and the search canonical identify different URLs."
+            : "og:url is absolute HTTPS and agrees with the canonical when one is declared.",
+      });
+    } catch {
+      findings.push({
+        status: "fix",
+        label: "Search and share identity",
+        detail: "og:url is not an absolute HTTPS URL without credentials.",
+      });
+    }
+  }
+  findings.push({
+    status: first("og:description") ? "pass" : "review",
+    label: "Share description",
+    detail:
+      first("og:description") ||
+      "No og:description found. It is optional in the protocol; a page-specific description helps describe the shared page.",
+  });
+  findings.push({
+    status: "review",
+    label: "X card declaration",
+    detail: first("twitter:card")
+      ? `Declared ${first("twitter:card")}. Current X card eligibility rules are unavailable; verify the actual shared result.`
+      : "No twitter:card found. Open Graph fallback and current card selection need an actual X check.",
+  });
+  if (
+    first("viewport") &&
+    /user-scalable\s*=\s*no|maximum-scale\s*=\s*1(?:[\s,]|$)/i.test(
+      first("viewport"),
+    )
+  )
+    findings.push({
+      status: "review",
+      label: "Zoom restriction",
+      detail:
+        "The viewport appears to restrict zoom. Review accessibility on a real device.",
+    });
   const robots = [
     ...(tags["robots"] || []),
     ...(tags["googlebot"] || []).map((v) => "googlebot: " + v),
@@ -318,6 +418,7 @@ export function metadata(html: string, url: string, headerRobots = "") {
     if (
       values.length > 1 &&
       key !== "og:image" &&
+      !key.startsWith("og:image:") &&
       key !== "og:locale:alternate"
     )
       findings.push({
@@ -329,7 +430,27 @@ export function metadata(html: string, url: string, headerRobots = "") {
   const structured = jsonld.map((text) => {
     try {
       const value = JSON.parse(text);
-      return { valid: true, type: value["@type"] || "JSON document" };
+      const nodes = (
+        Array.isArray(value)
+          ? value
+          : value && typeof value === "object" && Array.isArray(value["@graph"])
+            ? value["@graph"]
+            : [value]
+      ).slice(0, 40);
+      const types = nodes.flatMap((node) =>
+        node && typeof node === "object"
+          ? [node["@type"]]
+              .flat()
+              .filter((t): t is string => typeof t === "string")
+              .map((t) => t.slice(0, 120))
+          : [],
+      );
+      return {
+        valid: true,
+        type: types.join(", ").slice(0, 400) || "JSON document",
+        nodes: nodes.length,
+        types,
+      };
     } catch {
       return { valid: false, type: "Invalid JSON" };
     }
@@ -339,6 +460,20 @@ export function metadata(html: string, url: string, headerRobots = "") {
       status: "fix",
       label: "Structured data",
       detail: "An application/ld+json block is not valid JSON.",
+    });
+  else
+    findings.push({
+      status: structured.length ? "pass" : "review",
+      label: "Structured data",
+      detail: structured.length
+        ? `${structured.length} JSON-LD blocks parse as JSON. Types: ${structured
+            .map((s) => s.type)
+            .join("; ")
+            .slice(
+              0,
+              800,
+            )}. Schema correctness and rich-result eligibility have not been validated.`
+        : "No JSON-LD found. It is optional; choose a supported schema only when it describes the actual page.",
     });
   return {
     title: titles[0] || "",
@@ -352,6 +487,13 @@ export function metadata(html: string, url: string, headerRobots = "") {
     findings,
     icons,
     manifests,
+    headings,
+    contentImages,
+    imageDeclarations,
+    textLengths: {
+      title: [...(titles[0] || "")].length,
+      description: [...first("description")].length,
+    },
   };
 }
 export async function identityAssets(
@@ -543,7 +685,11 @@ export async function identityAssets(
     });
   return { icons, manifest, findings };
 }
-export function inspect(input: string, fetcher: typeof fetch = fetch) {
+export function inspect(
+  input: string,
+  fetcher: typeof fetch = fetch,
+  options: { discovery?: boolean } = {},
+) {
   return Effect.tryPromise({
     try: async (signal) => {
       const page = await boundedFetch(input, 512 * 1024, signal, fetcher);
@@ -560,14 +706,12 @@ export function inspect(input: string, fetcher: typeof fetch = fetch) {
       const candidates = [
         {
           kind: "Open Graph",
-          url: meta.tags["og:image"]?.[0] || meta.tags["og:image:url"]?.[0],
+          url: meta.imageDeclarations[0]?.url,
         },
         {
           kind: "X / Twitter",
           url:
-            meta.tags["twitter:image"]?.[0] ||
-            meta.tags["og:image"]?.[0] ||
-            meta.tags["og:image:url"]?.[0],
+            meta.tags["twitter:image"]?.[0] || meta.imageDeclarations[0]?.url,
         },
       ];
       for (const candidate of candidates) {
@@ -655,22 +799,53 @@ export function inspect(input: string, fetcher: typeof fetch = fetch) {
         }
       }
       const identity = await identityAssets(meta, page.url, signal, fetcher);
+      const discovery = options.discovery
+        ? await discoveryChecks(page.url, meta.canonical, signal, fetcher)
+        : { status: "not-requested", findings: [] as Finding[] };
+      const allFindings = [
+        ...meta.findings,
+        ...identity.findings,
+        ...imageFindings(meta, images),
+        ...discovery.findings,
+      ].map(explain);
+      const findings =
+        allFindings.length <= 80
+          ? allFindings
+          : [
+              ...allFindings
+                .sort(
+                  (a, b) =>
+                    ({ fix: 0, review: 1, pass: 2 })[a.status] -
+                    { fix: 0, review: 1, pass: 2 }[b.status],
+                )
+                .slice(0, 79),
+              explain({
+                status: "review",
+                label: "Inspection findings truncated",
+                detail:
+                  "The page produced more than eighty findings. Higher-priority findings were retained; this is not an exhaustive report.",
+              }),
+            ];
       return {
         contract: 1,
         kind: "page-inspection",
         checkedAt: new Date().toISOString(),
         guidanceReviewed: "2026-10-13",
+        diagnosticsReviewed: "2026-10-14",
         url: page.url,
         redirects: page.redirects,
         htmlBytes: page.bytes.length,
         ...meta,
-        findings: [...meta.findings, ...identity.findings],
+        findings,
+        discovery,
         identity,
         images,
         limits: {
           searchIndex: "not-verified",
           platformUnfurl: "not-verified",
-          robotsTxt: "not-checked",
+          robotsTxt: options.discovery ? "document-only" : "not-requested",
+          sitemap: options.discovery ? "single-document-only" : "not-requested",
+          crawlerPolicy: "not-simulated",
           renderedJavascript: "not-executed",
         },
       };

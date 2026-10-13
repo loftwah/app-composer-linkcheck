@@ -49,6 +49,7 @@ export default {
       if (!request.headers.get("content-type")?.startsWith("application/json"))
         return json({ error: "Use a JSON request body." }, 400);
       let value: string;
+      let discovery = false;
       try {
         if (Number(request.headers.get("content-length")) > 4096)
           throw new Error("size");
@@ -79,11 +80,12 @@ export default {
         const body = JSON.parse(new TextDecoder().decode(bytes));
         if (typeof body?.url !== "string") throw new Error("url");
         value = body.url;
+        discovery = body.discovery === true;
       } catch {
         return json({ error: "Send a JSON URL request under 4 KiB." }, 400);
       }
       return Effect.runPromise(
-        inspect(value).pipe(
+        inspect(value, fetch, { discovery }).pipe(
           Effect.match({
             onSuccess: (report) => json({ sourceSha: sha, ...report }),
             onFailure: (error) =>

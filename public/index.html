@@ -18,23 +18,23 @@
     <meta property="og:url" content="https://share.loftwah.com/" />
     <meta
       property="og:image"
-      content="https://composer.loftwah.com/brand/share-ai-v1.jpg"
+      content="https://share.loftwah.com/linkcheck-art.jpg"
     />
     <meta
       property="og:image:alt"
-      content="App Composer’s orange and charcoal interlocking frames."
+      content="An orange glass lens examining a linked charcoal object."
     />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta
       name="twitter:image"
-      content="https://composer.loftwah.com/brand/share-ai-v1.jpg"
+      content="https://share.loftwah.com/linkcheck-art.jpg"
     />
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
     <meta name="theme-color" content="#17181b" />
     <link rel="stylesheet" href="/style.css" />
-    <script src="/app.js" defer></script>
+    <script type="module" src="/app.js"></script>
     <link rel="stylesheet" href="/navigation.css" />
     <script src="/navigation.js" defer></script>
   </head>
@@ -128,6 +128,16 @@
             aria-describedby="supported"
           /><button id="submit">Inspect page</button>
         </div>
+        <label class="discovery-option"
+          ><input id="discovery" type="checkbox" /> Also inspect robots.txt and
+          one sitemap
+          <span class="small"
+            >Optional · two bounded document requests</span
+          ></label
+        >
+        <button id="cancel" type="button" class="secondary" hidden>
+          Cancel inspection
+        </button>
         <details id="supported">
           <summary>Supported sites and inspection limits</summary>
           <p>
@@ -158,14 +168,14 @@
         </div>
         <figure>
           <img
-            src="/composer-art.jpg"
+            src="/linkcheck-art.jpg"
             width="1200"
             height="630"
-            alt="App Composer’s orange and charcoal square frames joined together."
+            alt="An orange glass lens examining a linked charcoal object."
           />
           <figcaption>
-            App Composer’s generated share artwork. Inspect a page to see its
-            own preview.
+            Original generated Link Check artwork. Inspect a page to see its own
+            preview.
           </figcaption>
         </figure>
       </section>
@@ -175,7 +185,12 @@
             <h2 id="report-title">Inspection</h2>
             <p id="checked" class="small"></p>
           </div>
-          <button id="export" class="secondary">Export report</button>
+          <div class="report-actions">
+            <button id="copy" class="secondary">Copy agent review</button
+            ><button id="markdown" class="secondary">
+              Save readable report</button
+            ><button id="export" class="secondary">Export JSON</button>
+          </div>
         </div>
         <div class="workbench">
           <section class="identity">
@@ -229,6 +244,31 @@
         </div>
         <section id="page-checks" class="page-checks">
           <h2>Page checks</h2>
+          <p>
+            Fixes come first. Open an explanation when you want the reason, a
+            next step or the official reference. Optional metadata is a review,
+            not an automatic defect.
+          </p>
+          <div class="check-filters">
+            <label
+              >Show<select id="finding-filter">
+                <option value="all">Fixes and reviews</option>
+                <option value="fix">Fixes only</option>
+                <option value="review">Reviews only</option>
+              </select></label
+            ><label
+              >Area<select id="area-filter">
+                <option value="all">All areas</option>
+                <option>Search</option>
+                <option>Sharing</option>
+                <option>Accessibility</option>
+                <option>Site identity</option>
+                <option>Structured data</option>
+                <option>Discovery</option>
+              </select></label
+            >
+          </div>
+          <p id="filter-status" class="small" role="status"></p>
           <p id="no-problems" hidden>
             No required page checks need fixing. Review optional metadata and
             image evidence below.
@@ -239,16 +279,34 @@
             <ul id="passed-findings" class="findings"></ul>
           </details>
           <details>
+            <summary>
+              Page outline, character counts and discovery evidence
+            </summary>
+            <p class="small">
+              Counts describe the fetched HTML. There is no universal
+              title/description character limit or SEO score. Hidden content,
+              visual layout and full accessibility are not evaluated.
+            </p>
+            <dl id="page-inventory"></dl>
+            <ol id="page-outline"></ol>
+            <pre id="discovery-evidence"></pre>
+          </details>
+          <details>
             <summary>Raw metadata and inspection limits</summary>
             <pre id="raw"></pre>
+          </details>
+          <details id="agent-review-details">
+            <summary>Agent review text</summary>
+            <pre id="agent-review"></pre>
           </details>
         </section>
         <details class="guidance">
           <summary>Platform guidance and remaining checks</summary>
           <p class="small">
-            Guidance review: 13 October 2026. These source checks are separate
-            from this page’s inspection date. No platform-native sharing action
-            has been performed.
+            Platform guidance: 13 October 2026. Diagnostic references rechecked
+            14 October 2026. These source checks are separate from this page’s
+            inspection date. No platform-native sharing action has been
+            performed.
           </p>
           <div>
             <h3>Open Graph</h3>
@@ -266,6 +324,7 @@
                 >Guidance</a
               >
               — reviewed.
+
               <a
                 id="linkedin-debug"
                 href="https://www.linkedin.com/post-inspector/"
@@ -310,6 +369,28 @@
               crawler, cache and crop behavior remains unverified. Confirm by
               sharing a public test link in each relevant client; no automatic
               post is sent.
+            </p>
+            <h3>Discovery and structured data</h3>
+            <p>
+              <a
+                href="https://developers.google.com/search/docs/crawling-indexing/robots/intro"
+                >robots.txt</a
+              >,
+              <a
+                href="https://developers.google.com/search/docs/crawling-indexing/sitemaps/overview"
+                >sitemaps</a
+              >,
+              <a
+                href="https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls"
+                >canonicalisation</a
+              >
+              and
+              <a
+                href="https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data"
+                >structured data</a
+              >
+              were reviewed on 14 October 2026. Discovery reads documents; it
+              does not simulate each crawler or validate child sitemaps.
             </p>
             <h3>Search</h3>
             <p>
