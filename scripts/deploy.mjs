@@ -1,3 +1,4 @@
+import {verifySharing} from './verify-sharing.mjs';
 import { execFileSync } from "node:child_process";
 const git = (args) => execFileSync("git", args, { encoding: "utf8" }).trim();
 const sha = git(["rev-parse", "HEAD"]);
@@ -21,6 +22,7 @@ for (let attempt = 0; attempt < 12; attempt++) {
   const data = response?.ok ? await response.json() : null;
   if (data?.sha === sha) {
     console.log("Verified exact live Link Check source " + sha);
+    await verifySharing("https://share.loftwah.com");
     process.exit(0);
   }
   await new Promise((resolve) => setTimeout(resolve, 1500));
