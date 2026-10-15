@@ -40,7 +40,8 @@ body {
 }
 a {
   color: inherit;
-  text-underline-offset: 4px;
+  text-decoration: none;
+  font-weight: 600;
 }
 header {
   max-width: 1248px;
