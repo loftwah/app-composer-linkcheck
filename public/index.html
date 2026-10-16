@@ -41,7 +41,7 @@
     <script type="module" src="/app.js"></script>
     <link rel="stylesheet" href="/navigation.css" />
     <script src="/navigation.js" defer></script>
-  <link rel="stylesheet" href="/brand/page-share.css"></head>
+  <link rel="stylesheet" href="/brand/page-share.css"><link rel="stylesheet" href="/brand/theme-control.css"></head>
   <body>
     <a class="skip" href="#main">Skip to content</a>
     <header>
@@ -53,7 +53,7 @@
       <a class="composer-return composer-return--secondary" href="https://composer.loftwah.com/"><img src="/composer-mark.svg" width="28" height="28" alt=""><span>App Composer</span></a
         >
       <nav aria-label="Main" class="app-tools">
-        <a href="https://composer.loftwah.com/apps">All apps</a><a href="https://github.com/loftwah/app-composer-linkcheck">Source</a
+        <a href="https://github.com/loftwah/app-composer-linkcheck">Source</a
         ><button
           type="button"
           class="secondary"
@@ -61,7 +61,7 @@
           aria-haspopup="dialog"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>Apps <kbd>⌘K / Ctrl K</kbd></button
-        ><button id="theme" class="secondary" type="button">Light mode</button>
+        ><button type="button" class="theme-control secondary" id="theme" aria-label="Dark theme" aria-pressed="true" title="Switch to light theme"><svg data-theme-glyph="dark" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg><svg data-theme-glyph="light" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg></button>
       </nav>
     </header>
     <dialog id="app-navigation" aria-labelledby="app-navigation-title">
