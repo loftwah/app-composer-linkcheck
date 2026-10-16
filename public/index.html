@@ -41,7 +41,7 @@
     <script type="module" src="/app.js"></script>
     <link rel="stylesheet" href="/navigation.css" />
     <script src="/navigation.js" defer></script>
-  </head>
+  <link rel="stylesheet" href="/brand/page-share.css"></head>
   <body>
     <a class="skip" href="#main">Skip to content</a>
     <header>
@@ -412,7 +412,7 @@
           </div>
         </details>
       </div>
-      <footer>
+      <footer><div class="public-page-share" data-page-share hidden><button type="button" class="secondary" data-page-native hidden>Share page</button><button type="button" class="secondary" data-page-copy hidden>Copy page link</button><p role="status" aria-live="polite" data-share-status></p><label data-share-fallback hidden>Published page URL<input readonly aria-label="Published page URL"></label></div>
         <p>
           Independent mini-app · MIT ·
           <a href="/manifest.json">App contract</a> ·
@@ -427,5 +427,5 @@
       </footer>
     </main>
   <script type="module" src="/brand/page-performance.mjs"></script>
-</body>
+<script type="module" src="/brand/page-share.mjs"></script></body>
 </html>

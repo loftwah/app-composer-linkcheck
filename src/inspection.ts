@@ -39,7 +39,7 @@ export function target(input: string) {
     url.port ||
     url.username ||
     url.password ||
-    url.search ||
+    (url.search && !/^\?share=[a-f0-9]{16}$/.test(url.search)) ||
     url.hash ||
     !hosts.includes(url.hostname) ||
     /[\u0000-\u0020\\%]/.test(input) ||
@@ -47,7 +47,7 @@ export function target(input: string) {
   )
     throw new InvalidTarget({
       message:
-        "Use a public page on a supported hostname, without credentials, query strings or private paths.",
+        "Use a public page on a supported hostname, without credentials, private paths or unrelated query strings.",
     });
   return url;
 }
