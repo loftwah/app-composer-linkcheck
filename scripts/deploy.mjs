@@ -22,7 +22,20 @@ for (let attempt = 0; attempt < 12; attempt++) {
   const data = response?.ok ? await response.json() : null;
   if (data?.sha === sha) {
     console.log("Verified exact live Link Check source " + sha);
-    await verifySharing("https://share.loftwah.com");
+    // Assets can briefly 404 while a new deployment propagates to the edge, so
+    // retry the sharing probe instead of failing on a cold edge.
+    let sharingVerified = false;
+    for (let attempt = 0; attempt < 8; attempt++) {
+      try {
+        await verifySharing("https://share.loftwah.com");
+        sharingVerified = true;
+        break;
+      } catch (error) {
+        if (attempt === 7) throw error;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 2500));
+    }
+    if (!sharingVerified) throw new Error("Live sharing card did not converge");
     process.exit(0);
   }
   await new Promise((resolve) => setTimeout(resolve, 1500));

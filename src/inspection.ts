@@ -74,7 +74,7 @@ export async function boundedFetch(
       if (!next || hop === 3)
         throw new FetchFailed({
           message:
-            "The redirect chain did not reach a public response within three redirects.",
+            "The redirect chain did not reach a public response within three redirects. Inspect the final public address directly.",
         });
       url = target(new URL(next, url).href);
       redirects.push(url.href);
@@ -82,19 +82,29 @@ export async function boundedFetch(
     }
     if (!response.ok) {
       await response.body?.cancel();
+      // Every failure says what to do next: the fix differs between a wrong
+      // address and a public page that is simply having a bad minute.
       throw new FetchFailed({
-        message: `The target returned HTTP ${response.status}.`,
+        message:
+          `The target returned HTTP ${response.status}. ` +
+          (response.status === 404
+            ? "Check the address, including its path, and inspect a page that exists."
+            : response.status === 429 || response.status >= 500
+              ? "That is usually temporary: wait a moment and inspect again."
+              : "Check the public address and inspect again."),
       });
     }
     if (Number(response.headers.get("content-length")) > limit) {
       await response.body?.cancel();
       throw new TooLarge({
-        message: "The response exceeds the inspection byte limit.",
+        message:
+          "The response exceeds the inspection byte limit. Inspect a specific page rather than a large download.",
       });
     }
     if (!response.body)
       throw new InvalidContent({
-        message: "The target returned an empty response.",
+        message:
+          "The target returned an empty response. Inspect the page itself rather than a download.",
       });
     const reader = response.body.getReader();
     const chunks: Uint8Array[] = [];
@@ -107,7 +117,8 @@ export async function boundedFetch(
         if (size > limit) {
           await reader.cancel();
           throw new TooLarge({
-            message: "The streamed response exceeds the inspection byte limit.",
+            message:
+              "The streamed response exceeds the inspection byte limit. Inspect a specific page rather than a large download.",
           });
         }
         chunks.push(value);
@@ -131,7 +142,10 @@ export async function boundedFetch(
       robots: response.headers.get("x-robots-tag") || "",
     };
   }
-  throw new FetchFailed({ message: "Unable to fetch the target." });
+  throw new FetchFailed({
+    message:
+      "Unable to reach the target. Check that the hostname is publicly resolvable, then inspect again.",
+  });
 }
 export type Finding = {
   status: "pass" | "fix" | "review";
@@ -695,7 +709,8 @@ export function inspect(
       const page = await boundedFetch(input, 512 * 1024, signal, fetcher);
       if (page.type !== "text/html")
         throw new InvalidContent({
-          message: "The page must return text/html.",
+          message:
+            "The target did not return an HTML page. Inspect a page URL rather than an image, PDF or file download.",
         });
       const meta = metadata(
         new TextDecoder().decode(page.bytes),
@@ -858,7 +873,7 @@ export function inspect(
         ? error
         : new FetchFailed({
             message:
-              "The public response could not be read. Retry or check the origin.",
+              "The public response could not be read. Check that the origin answers public requests, then inspect again.",
           }),
   }).pipe(
     Effect.timeoutOrElse({

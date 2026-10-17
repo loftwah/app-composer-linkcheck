@@ -101,6 +101,43 @@ function identity() {
     $("#icon-evidence").append(p);
   }
 }
+function setStatus(text, state) {
+  $("#status").textContent = text;
+  if (state) $("#status").dataset.state = state;
+  else delete $("#status").dataset.state;
+}
+// A failed run must not leave the previous run's numbers in the DOM where a
+// screen reader or a later render could still read them as current.
+function clearReport() {
+  report = undefined;
+  $("#report").hidden = true;
+  for (const selector of [
+    "#findings",
+    "#passed-findings",
+    "#site-details",
+    "#icon-evidence",
+    "#page-inventory",
+    "#page-outline",
+  ])
+    $(selector).replaceChildren();
+  for (const selector of [
+    "#raw",
+    "#agent-review",
+    "#discovery-evidence",
+    "#summary-count",
+    "#filter-status",
+    "#checked",
+    "#image-dimensions",
+    "#image-proof",
+  ])
+    $(selector).textContent = "";
+  $("#no-problems").hidden = true;
+  $("#site-icon").hidden = true;
+  $("#preview-image").hidden = true;
+  $("#preview-image").removeAttribute("src");
+  $("#passed-label").textContent = "Checks passed";
+  $("#report-title").textContent = "Inspection";
+}
 $("#inspect").addEventListener("submit", async (event) => {
   event.preventDefault();
   const current = ++generation;
@@ -109,10 +146,8 @@ $("#inspect").addEventListener("submit", async (event) => {
   $("#cancel").hidden = false;
   $("#submit").disabled = true;
   $("#submit").textContent = "Inspecting…";
-  $("#status").textContent =
-    "Reading the public page, site icons and share images…";
-  $("#report").hidden = true;
-  report = undefined;
+  setStatus("Reading the public page, site icons and share images…");
+  clearReport();
   try {
     const response = await fetch("/api/inspect", {
       method: "POST",
@@ -163,16 +198,20 @@ $("#inspect").addEventListener("submit", async (event) => {
     );
     $("#report").hidden = false;
     $("#empty").hidden = true;
-    $("#status").textContent =
-      "Inspection complete. Export this report or review the findings below.";
+    setStatus(
+      "Inspection complete. Export this report or review the findings below.",
+    );
     identity();
     preview();
   } catch (error) {
     if (current !== generation) return;
-    $("#status").textContent =
+    clearReport();
+    setStatus(
       error.name === "AbortError"
-        ? "Inspection cancelled. You can retry."
-        : error.message;
+        ? "Inspection cancelled. Click Inspect page to try again."
+        : error.message,
+      error.name === "AbortError" ? "idle" : "failed",
+    );
     $("#empty").hidden = false;
   } finally {
     if (current !== generation) return;
@@ -248,8 +287,18 @@ function renderFindings() {
     li.append(strong, body);
     $(finding.status === "pass" ? "#passed-findings" : "#findings").append(li);
   }
+  const scope = [
+    filter === "all" ? "" : filter === "fix" ? "fixes" : "reviews",
+    area === "all" ? "" : area.toLowerCase(),
+  ]
+    .filter(Boolean)
+    .join(" · ");
+  // "Nothing here" is itself a finding: say what the filter hid instead of
+  // leaving an empty list that looks like a failure to load.
   $("#filter-status").textContent =
-    `${shown} ${shown === 1 ? "finding" : "findings"} shown. Passed checks remain in their own disclosure.`;
+    shown === 0
+      ? `No ${scope || "findings"} to show. Passed checks stay in their own disclosure.`
+      : `${shown} ${shown === 1 ? "finding" : "findings"} shown${scope ? ` (${scope})` : ""}. Passed checks remain in their own disclosure.`;
 }
 for (const selector of ["#finding-filter", "#area-filter"])
   $(selector).addEventListener("change", renderFindings);

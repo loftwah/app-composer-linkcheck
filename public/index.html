@@ -18,25 +18,36 @@
     <meta property="og:url" content="https://share.loftwah.com/" />
     <meta
       property="og:image"
-      content="https://share.loftwah.com/linkcheck-art.jpg"
+      content="https://share.loftwah.com/brand/linkcheck-share-v3.jpg"
     />
     <meta
       property="og:image:alt"
-      content="An orange glass lens examining a linked charcoal object."
+      content="Link Check: a teal paper magnifier over an ivory page card holding a burnt-orange landscape panel above two text rules."
     />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Link Check · Site identity, SEO and share previews" />
     <meta name="twitter:description" content="Inspect live Open Graph and SEO metadata, verify image dimensions and export a dated report for your agent." />
-    <meta name="twitter:image:alt" content="An orange glass lens examining a linked charcoal object." />
+    <meta
+      name="twitter:image:alt"
+      content="Link Check: a teal paper magnifier over an ivory page card holding a burnt-orange landscape panel above two text rules."
+    />
     <meta property="og:image:type" content="image/jpeg" />
     <meta
       name="twitter:image"
-      content="https://share.loftwah.com/linkcheck-art.jpg"
+      content="https://share.loftwah.com/brand/linkcheck-share-v3.jpg"
     />
-    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="icon" type="image/svg+xml" href="/brand/mark.svg" />
+    <link rel="apple-touch-icon" href="/brand/icon.png" />
     <meta name="theme-color" content="#17181b" />
+    <link
+      rel="preload"
+      href="/space.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
     <link rel="stylesheet" href="/style.css" />
     <script type="module" src="/app.js"></script>
     <link rel="stylesheet" href="/navigation.css" />
@@ -46,7 +57,7 @@
     <a class="skip" href="#main">Skip to content</a>
     <header class="app-header">
       <a class="brand" href="/"
-        ><img src="/icon.svg" width="36" height="36" alt="" /><span
+        ><img src="/brand/mark.svg" width="36" height="36" alt="" /><span
           >Link Check</span
         ></a
       >
@@ -78,27 +89,52 @@
       <ul>
         <li data-destination>
           <a href="https://guestbook.loftwah.com"
-            >Here / there<small>Photo guestbook</small></a
+            ><img
+              src="/brand/apps/herethere-small-v3.webp"
+              width="40"
+              height="40"
+              alt=""
+            /><span>Here / there<small>Photo guestbook</small></span></a
           >
         </li>
         <li data-destination>
           <a href="https://showcase.loftwah.com"
-            >Linkarooie<small>Curated collection</small></a
+            ><img
+              src="/brand/apps/linkarooie-small-v3.webp"
+              width="40"
+              height="40"
+              alt=""
+            /><span>Linkarooie<small>Curated collection</small></span></a
           >
         </li>
         <li data-destination>
-          <a href="https://share.loftwah.com"
-            >Link Check<small>SEO and sharing</small></a
+          <a href="https://share.loftwah.com" aria-current="page"
+            ><img
+              src="/brand/apps/linkcheck-small-v3.webp"
+              width="40"
+              height="40"
+              alt=""
+            /><span>Link Check<small>SEO and sharing</small></span></a
           >
         </li>
         <li data-destination>
           <a href="https://ready.loftwah.com"
-            >Hello World<small>Deployment reference</small></a
+            ><img
+              src="/brand/apps/hello-small-v3.webp"
+              width="40"
+              height="40"
+              alt=""
+            /><span>Hello World<small>Deployment reference</small></span></a
           >
         </li>
         <li data-destination>
           <a href="https://ai.loftwah.com"
-            >Portable AI State<small>Fictional encrypted assistant</small></a
+            ><img
+              src="/brand/apps/carryforward-small-v3.webp"
+              width="40"
+              height="40"
+              alt=""
+            /><span>Carry / forward<small>Portable assistant memory</small></span></a
           >
         </li>
         <li data-destination>
@@ -145,8 +181,8 @@
         <details id="supported">
           <summary>Supported sites and inspection limits</summary>
           <p>
-            This deployment checks Composer, Guestbook, Showcase, Hello World,
-            Portable AI State and Link Check. A fork can configure its own
+            This deployment checks Composer, Here / there, Linkarooie, Hello
+            World, Carry / forward and Link Check. A fork can configure its own
             reviewed public hosts. It reads public HTML and bounded image files
             without executing scripts.
           </p>
@@ -172,14 +208,19 @@
         </div>
         <figure>
           <img
-            src="/linkcheck-art.jpg"
-            width="1200"
-            height="630"
-            alt="An orange glass lens examining a linked charcoal object."
+            src="/brand/linkcheck-art-v3-960.webp"
+            srcset="
+              /brand/linkcheck-art-v3-480.webp 480w,
+              /brand/linkcheck-art-v3-960.webp 960w
+            "
+            sizes="(max-width: 800px) calc(100vw - 40px), 400px"
+            width="960"
+            height="960"
+            alt="A teal cut-paper magnifier over an ivory page card holding a burnt-orange landscape panel above two graphite rules."
           />
           <figcaption>
-            Original generated Link Check artwork. Inspect a page to see its own
-            preview.
+            Reviewed cut-paper Link Check artwork, kept separate from any
+            inspected page. Inspect a page to see its own preview.
           </figcaption>
         </figure>
       </section>
