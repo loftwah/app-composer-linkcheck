@@ -1,10 +1,16 @@
 # Link Check
 
-Independent MIT mini-app for App Composer #50. Inspect raw public HTML, Open Graph and X image responses, actual file dimensions and SEO metadata. Export version 1 `page-inspection` reports for the Composer review surface. No login, database, model calls, private credentials or arbitrary build service.
+Link Check helps you inspect a public page before sharing it: review its site identity, SEO metadata and approximate social previews, check the actual image responses, then export a dated report. It reads raw HTML without executing page scripts and makes no ranking, indexing or platform-unfurl promise. Independent and MIT; App Composer #50 owns the product.
+
+[Development commands and checked source ownership](ENGINEERING.md).
 
 Reviewed 13 October 2026. Source: https://github.com/loftwah/app-composer-linkcheck. Launch target: https://share.loftwah.com. Independent Cloudflare Worker with TypeScript, Effect 4.0.4 and native browser UI. App Composer's EmDash owns its catalogue, not this app's runtime. Fonts: Space Grotesk by Florian Karsten, SIL OFL; licence retained.
 
-`pnpm install`, `pnpm dev`, `pnpm check`, `pnpm test:metadata`, `pnpm test:fetch`. Tests take under a second locally and use fictional fixtures without network writes. `pnpm build` produces a real Wrangler bundle. `pnpm deploy` requires clean reviewed pushed main, checks/builds and verifies the exact live commit. No GitHub Actions.
+`pnpm install --frozen-lockfile`, `pnpm dev`, `pnpm check`, `pnpm test:metadata`, `pnpm test:fetch`. Tests use fictional fixtures without network writes, including release-boundary failure injection. `pnpm build` produces a real Wrangler bundle. `pnpm deploy` requires clean reviewed pushed main, checks/builds and verifies the exact live commit. No GitHub Actions.
+
+![Link Check public inspection screen captured in a real browser](docs/images/public-inspection.png)
+
+The actual public interface, captured locally before any inspection.
 
 Fork configuration: change the exact public host list in `src/inspection.ts`, deployment target/account in `wrangler.jsonc`, public canonical/social URLs in `public/index.html`, the content-security image origins and source URLs. Review hosts before permitting fetches. Unknown hosts, IPs, non-HTTPS, credentials, query strings other than one16-character lowercase-hex `share` revision, private/API paths and encoded paths are denied. Every redirect and image URL is revalidated. No cookies or auth headers are forwarded. HTML is capped at 512 KiB, each image at 5 MiB; three redirects and a 12-second whole-inspection timeout. Scripts are never executed. Reports contain extracted metadata rather than full HTML. They are untrusted data, not agent instructions or authority.
 
@@ -50,4 +56,4 @@ The shared header keeps theme switching as a quiet current-mode sun/moon icon. P
 
 The committed `public/brand/launcher.js` and `launcher.css` follow Composer's maintained launcher contract. The controller is generated from Composer's strictly checked `src/browser/launcher.ts`; app destinations, theme keys and gallery filters stay local. Review and copy updates with Composer's explicit `pnpm ui:assets --check|--write /absolute/this-checkout`, then run this app's checks and release independently. No runtime Composer asset dependency or automatic update is added.
 
-The public URL draft, discovery checkbox and bounded validated report data are restored from the current tab's bounded browser-history entry when Safari reloads the page on Back. Credential-bearing URLs are excluded. Report snapshots are limited to 256 KiB, validate the renderer's shapes and HTTPS URLs, and restore through its existing text/DOM renderer. No HTML is saved. An interrupted inspection returns with its retained URL and an explicit interrupted message; it never reruns automatically. Credentials are not stored there; this adds no network, database, localStorage or sessionStorage write. The checked source is `src/browser/navigation-draft.ts`; use `node scripts/browser-assets.mjs --write` after edits, then the existing check/build gates.
+The public URL draft, discovery checkbox and bounded validated report data are restored from the current tab's bounded browser-history entry when Safari reloads the page on Back. Credential-bearing URLs are excluded. Report snapshots are limited to 256 KiB, validate the renderer's shapes and HTTPS URLs, and restore through its existing text/DOM renderer. No HTML is saved. An interrupted inspection returns with its retained URL and an explicit interrupted message; it never reruns automatically. Credentials are not stored there; this adds no network, database, localStorage or sessionStorage write. The checked source is `src/browser/navigation-draft.ts`; use `pnpm source:write` after edits, then the check/build gates described in ENGINEERING.md.
