@@ -49,3 +49,5 @@ The shared header keeps theme switching as a quiet current-mode sun/moon icon. P
 ## Shared Apps launcher
 
 The committed `public/brand/launcher.js` and `launcher.css` follow Composer's maintained launcher contract. The controller is generated from Composer's strictly checked `src/browser/launcher.ts`; app destinations, theme keys and gallery filters stay local. Review and copy updates with Composer's explicit `pnpm ui:assets --check|--write /absolute/this-checkout`, then run this app's checks and release independently. No runtime Composer asset dependency or automatic update is added.
+
+The public URL draft and discovery checkbox are restored from the current tab's bounded browser-history entry when Safari reloads the page on Back. Credential-bearing URLs are excluded. Reports and credentials are not stored there; this adds no network, database, localStorage or sessionStorage write. The checked source is `src/browser/navigation-draft.ts`; use `node scripts/browser-assets.mjs --write` after edits, then the existing check/build gates.

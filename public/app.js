@@ -1,3 +1,4 @@
+import "./navigation-draft.js";
 import { reportJSON } from "./report-format.js";
 const $ = (selector) => document.querySelector(selector);
 let report;
