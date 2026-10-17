@@ -1,9 +1,14 @@
-import "./navigation-draft.js";
+import {
+  rememberReport,
+  rememberPending,
+  restoredInspection,
+} from "./navigation-draft.js";
 import { reportJSON } from "./report-format.js";
 const $ = (selector) => document.querySelector(selector);
 let report;
 let controller;
 let generation = 0;
+let leaving = false;
 try {
   if (localStorage.getItem("linkcheck-theme") === "light")
     document.documentElement.dataset.theme = "light";
@@ -139,6 +144,49 @@ function clearReport() {
   $("#passed-label").textContent = "Checks passed";
   $("#report-title").textContent = "Inspection";
 }
+function renderReport(data) {
+  report = data;
+  $("#report-title").textContent = new URL(report.url).hostname;
+  $("#checked").textContent =
+    "Fetched " +
+    new Date(report.checkedAt).toLocaleString() +
+    ". No scripts executed.";
+  renderFindings();
+  inventory();
+  $("#agent-review").textContent = agentText();
+  const fixes = report.findings.filter((f) => f.status === "fix").length;
+  const passes = report.findings.filter((f) => f.status === "pass").length;
+  const imageFailures = report.images.filter(
+    (i) => i.status !== "verified",
+  ).length;
+  $("#summary-count").textContent =
+    `${fixes} page ${fixes === 1 ? "fix" : "fixes"} · ${imageFailures} share-image ${imageFailures === 1 ? "problem" : "problems"} · ${passes} page checks passed`;
+  $("#no-problems").hidden = fixes !== 0;
+  $("#passed-label").textContent = `${passes} page checks passed`;
+  $("#raw").textContent = JSON.stringify(
+    {
+      sourceSha: report.sourceSha,
+      url: report.url,
+      redirects: report.redirects,
+      tags: report.tags,
+      icons: report.icons,
+      identity: report.identity,
+      structured: report.structured,
+      limits: report.limits,
+      imageDeclarations: report.imageDeclarations,
+      discovery: report.discovery,
+    },
+    null,
+    2,
+  );
+  $("#report").hidden = false;
+  $("#empty").hidden = true;
+  setStatus(
+    "Inspection complete. Export this report or review the findings below.",
+  );
+  identity();
+  preview();
+}
 $("#inspect").addEventListener("submit", async (event) => {
   event.preventDefault();
   const current = ++generation;
@@ -149,6 +197,7 @@ $("#inspect").addEventListener("submit", async (event) => {
   $("#submit").textContent = "Inspecting…";
   setStatus("Reading the public page, site icons and share images…");
   clearReport();
+  rememberPending(true);
   try {
     const response = await fetch("/api/inspect", {
       method: "POST",
@@ -160,53 +209,18 @@ $("#inspect").addEventListener("submit", async (event) => {
       signal: controller.signal,
     });
     const data = await response.json();
-    if (current !== generation) return;
+    if (current !== generation || leaving) return;
     if (!response.ok)
       throw new Error(data.error || "Inspection failed. Retry.");
-    report = data;
-    $("#report-title").textContent = new URL(report.url).hostname;
-    $("#checked").textContent =
-      "Fetched " +
-      new Date(report.checkedAt).toLocaleString() +
-      ". No scripts executed.";
-    renderFindings();
-    inventory();
-    $("#agent-review").textContent = agentText();
-    const fixes = report.findings.filter((f) => f.status === "fix").length;
-    const passes = report.findings.filter((f) => f.status === "pass").length;
-    const imageFailures = report.images.filter(
-      (i) => i.status !== "verified",
-    ).length;
-    $("#summary-count").textContent =
-      `${fixes} page ${fixes === 1 ? "fix" : "fixes"} · ${imageFailures} share-image ${imageFailures === 1 ? "problem" : "problems"} · ${passes} page checks passed`;
-    $("#no-problems").hidden = fixes !== 0;
-    $("#passed-label").textContent = `${passes} page checks passed`;
-    $("#raw").textContent = JSON.stringify(
-      {
-        sourceSha: report.sourceSha,
-        url: report.url,
-        redirects: report.redirects,
-        tags: report.tags,
-        icons: report.icons,
-        identity: report.identity,
-        structured: report.structured,
-        limits: report.limits,
-        imageDeclarations: report.imageDeclarations,
-        discovery: report.discovery,
-      },
-      null,
-      2,
-    );
-    $("#report").hidden = false;
-    $("#empty").hidden = true;
-    setStatus(
-      "Inspection complete. Export this report or review the findings below.",
-    );
-    identity();
-    preview();
+    renderReport(data);
+    if (!rememberReport(data))
+      setStatus(
+        "Inspection complete. This report could not be kept for Back navigation. Export it before leaving.",
+      );
   } catch (error) {
-    if (current !== generation) return;
+    if (current !== generation || leaving) return;
     clearReport();
+    rememberPending(false);
     setStatus(
       error.name === "AbortError"
         ? "Inspection cancelled. Click Inspect page to try again."
@@ -215,7 +229,7 @@ $("#inspect").addEventListener("submit", async (event) => {
     );
     $("#empty").hidden = false;
   } finally {
-    if (current !== generation) return;
+    if (current !== generation || leaving) return;
     $("#cancel").hidden = true;
     $("#submit").disabled = false;
     $("#submit").textContent = "Inspect page";
@@ -368,4 +382,49 @@ $("#markdown").addEventListener("click", () => {
   a.download = "linkcheck-report.md";
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+});
+
+const priorInspection = restoredInspection();
+if (priorInspection.report) {
+  renderReport(priorInspection.report);
+  setStatus(
+    "Restored the previous report in this tab. No inspection was rerun.",
+  );
+} else if (priorInspection.pending) {
+  setStatus(
+    "The inspection was interrupted when you left. Your URL is retained; inspect again when ready.",
+    "idle",
+  );
+  rememberPending(false);
+}
+
+// Mark a real same-tab destination choice before navigation aborts its fetch.
+// A cached return must also release pending UI, without reissuing the request.
+document.querySelector("#app-navigation").addEventListener("click", (event) => {
+  const link =
+    event.target instanceof Element ? event.target.closest("a") : null;
+  if (
+    !link ||
+    event.ctrlKey ||
+    event.metaKey ||
+    event.shiftKey ||
+    link.target === "_blank"
+  )
+    return;
+  leaving = true;
+  if ($("#submit").disabled) rememberPending(true);
+});
+window.addEventListener("pageshow", (event) => {
+  leaving = false;
+  if (!event.persisted || !$("#submit").disabled) return;
+  generation++;
+  controller?.abort();
+  $("#cancel").hidden = true;
+  $("#submit").disabled = false;
+  $("#submit").textContent = "Inspect page";
+  setStatus(
+    "The inspection was interrupted when you left. Your URL is retained; inspect again when ready.",
+    "idle",
+  );
+  rememberPending(false);
 });
