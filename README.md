@@ -14,7 +14,7 @@ MP requested current AI failure-mode awareness: untrusted web metadata may conta
 
 The public inspection route is capped at 20 requests per minute per Cloudflare location across callers, using the native Workers rate-limit binding. It fails closed if that binding is absent. This is an abuse limit, not a global or dollar spending cap. No D1/R2/paid SEO resource or new subscription is required. Official binding behavior: https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/ (reviewed 13 October 2026).
 
-The inspection API accepts bounded JSON POST bodies, keeping pasted target URLs out of request query logs. Request bodies and reports are not application-persisted; standard Cloudflare operational request logs still apply.
+The inspection API accepts bounded JSON POST bodies, keeping pasted target URLs out of request query logs. Reports have bounded recovery in this tab's browser-history entry; request bodies and reports are not server-persisted; standard Cloudflare operational request logs still apply.
 
 Site identity checks inspect the first declared favicon and Apple touch icon (256 KiB each), optional manifest JSON (64 KiB), and theme colour. SVG is parsed as inert text and never previewed or executed; viewBox coordinates are labelled separately from raster pixels. Nested manifest icons, installation and browser selection among icon variants remain unverified. Guidance reviewed 13 October 2026: https://html.spec.whatwg.org/multipage/links.html#rel-icon and https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/link. Run `pnpm test:identity` for this focused group.
 
@@ -45,3 +45,9 @@ Add `?vitals=1` to the public page, then open “Page performance” for local L
 MP direction, 16 October 2026: links use no underlines and retain visible keyboard focus. Page, Open Graph and X titles/descriptions agree; the app serves an explicit large-image card with dimensions, type and alt text. The normal release checks live public HTML and JPEG dimensions with a marked Twitterbot user-agent probe. Actual X rendering is a separate observation; a probe alone does not establish it.
 
 The shared header keeps theme switching as a quiet current-mode sun/moon icon. Preserve the stable Dark theme accessible toggle name, pressed state, keyboard focus, 44px target and existing saved-preference key. Keep the secondary control class so light-theme primary-button rules cannot override its foreground.
+
+## Shared Apps launcher
+
+The committed `public/brand/launcher.js` and `launcher.css` follow Composer's maintained launcher contract. The controller is generated from Composer's strictly checked `src/browser/launcher.ts`; app destinations, theme keys and gallery filters stay local. Review and copy updates with Composer's explicit `pnpm ui:assets --check|--write /absolute/this-checkout`, then run this app's checks and release independently. No runtime Composer asset dependency or automatic update is added.
+
+The public URL draft, discovery checkbox and bounded validated report data are restored from the current tab's bounded browser-history entry when Safari reloads the page on Back. Credential-bearing URLs are excluded. Report snapshots are limited to 256 KiB, validate the renderer's shapes and HTTPS URLs, and restore through its existing text/DOM renderer. No HTML is saved. An interrupted inspection returns with its retained URL and an explicit interrupted message; it never reruns automatically. Credentials are not stored there; this adds no network, database, localStorage or sessionStorage write. The checked source is `src/browser/navigation-draft.ts`; use `node scripts/browser-assets.mjs --write` after edits, then the existing check/build gates.

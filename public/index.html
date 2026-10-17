@@ -2,7 +2,7 @@
 <html lang="en" data-theme="dark">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
     <title>Link Check · Site identity, SEO and share previews</title>
     <meta
       name="description"
@@ -51,6 +51,8 @@
     <link rel="stylesheet" href="/style.css" />
     <script type="module" src="/app.js"></script>
     <link rel="stylesheet" href="/navigation.css" />
+    <link rel="stylesheet" href="/brand/launcher.css" />
+    <script src="/brand/launcher.js" defer></script>
     <script src="/navigation.js" defer></script>
   <link rel="stylesheet" href="/brand/page-share.css"><link rel="stylesheet" href="/brand/theme-control.css"></head>
   <body>
@@ -77,7 +79,7 @@
     <dialog id="app-navigation" aria-labelledby="app-navigation-title">
       <div class="dialog-heading">
         <h2 id="app-navigation-title">Apps and shortcuts</h2>
-        <button type="button" data-close-apps>Close</button>
+        <button type="button" data-close-apps autofocus>Close</button>
       </div>
       <label
         >Find an app or task<input
