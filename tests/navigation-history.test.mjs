@@ -55,3 +55,39 @@ test("bounded tab history keeps report data and rejects unsafe renderer shapes a
   ])
     assert.equal(validatedReport({ ...valid, ...patch }), null);
 });
+
+test("history quota and permission failures cannot claim a report was retained", async () => {
+  const { rememberReport } = await import("../public/navigation-draft.js");
+  const original = Object.getOwnPropertyDescriptor(globalThis, "history");
+  try {
+    for (const name of ["QuotaExceededError", "SecurityError"]) {
+      Object.defineProperty(globalThis, "history", {
+        configurable: true,
+        value: {
+          state: null,
+          replaceState() {
+            throw new DOMException("Unavailable", name);
+          },
+        },
+      });
+      assert.equal(rememberReport(fixture()), false);
+    }
+    let state = null;
+    Object.defineProperty(globalThis, "history", {
+      configurable: true,
+      value: {
+        get state() {
+          return state;
+        },
+        replaceState(next) {
+          state = structuredClone(next);
+        },
+      },
+    });
+    assert.equal(rememberReport(fixture()), true);
+    assert.equal(state.composerLinkcheckDraft.report.title, fixture().title);
+  } finally {
+    if (original) Object.defineProperty(globalThis, "history", original);
+    else delete globalThis.history;
+  }
+});

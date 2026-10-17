@@ -16,6 +16,19 @@ function publicURL(value: unknown): value is string {
     return false;
   }
 }
+// Incomplete and cleared drafts are inert form text, not fetch targets. Never
+// retain URL user-info, including a partially typed credential-bearing URL.
+function draftText(value: unknown): string | null {
+  if (!text(value, 2048) || /^[a-z][a-z0-9+.-]*:\/\/[^/?#]*@/i.test(value))
+    return null;
+  try {
+    const parsed = new URL(value);
+    if (parsed.username || parsed.password) return null;
+  } catch {
+    /* Partial draft. */
+  }
+  return value;
+}
 function jsonData(value: unknown, depth = 0): value is Json {
   if (depth > 10) return false;
   if (value === null || typeof value === "boolean") return true;
@@ -146,14 +159,16 @@ function update(patch: Record<string, unknown>) {
       },
       "",
     );
+    return true;
   } catch {
     /* History capacity/permission failure cannot interrupt inspection. */
+    return false;
   }
 }
 export function rememberReport(report: unknown): boolean {
   const safe = validatedReport(report);
-  update({ report: safe, pending: false });
-  return safe !== null;
+  const stored = update({ report: safe, pending: false });
+  return safe !== null && stored;
 }
 export function rememberPending(pending: boolean) {
   update({ report: null, pending });
@@ -161,11 +176,13 @@ export function rememberPending(pending: boolean) {
 export function restoredInspection(): {
   report: JsonObject | null;
   pending: boolean;
+  draftOmitted: boolean;
 } {
   const saved = entry();
   return {
     report: saved?.version === 1 ? validatedReport(saved.report) : null,
     pending: saved?.version === 1 && saved.pending === true,
+    draftOmitted: saved?.version === 1 && saved.draftOmitted === true,
   };
 }
 (() => {
@@ -176,15 +193,20 @@ export function restoredInspection(): {
   const saved = entry();
   if (
     saved?.version === 1 &&
-    publicURL(saved.url) &&
+    draftText(saved.url) !== null &&
     typeof saved.discovery === "boolean"
   ) {
-    url.value = saved.url;
+    url.value = String(saved.url);
     discovery.checked = saved.discovery;
   }
   function remember() {
-    if (url && discovery && publicURL(url.value))
-      update({ url: url.value, discovery: discovery.checked });
+    if (!url || !discovery) return;
+    const draft = draftText(url.value);
+    update({
+      url: draft ?? "",
+      discovery: discovery.checked,
+      draftOmitted: draft === null,
+    });
   }
   url.addEventListener("input", remember);
   discovery.addEventListener("change", remember);

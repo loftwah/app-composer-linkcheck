@@ -398,6 +398,13 @@ if (priorInspection.report) {
   rememberPending(false);
 }
 
+if (priorInspection.draftOmitted) {
+  setStatus(
+    "That draft could not be retained safely. Enter a public URL without credentials, up to 2048 characters.",
+    "idle",
+  );
+}
+
 // Mark a real same-tab destination choice before navigation aborts its fetch.
 // A cached return must also release pending UI, without reissuing the request.
 document.querySelector("#app-navigation").addEventListener("click", (event) => {
