@@ -1,0 +1,42 @@
+Original App Composer illustration — Link Check
+Reviewed 17 October 2026.
+
+Source: one generated raster, "tile-linkcheck-v5", produced through the fal.ai queue endpoint
+openai/gpt-image-2.5/sunburst/text-to-image under MP's authorisation, request
+01a14912-9d55-7ac0-bb69-effedde1402e. The prompt, the full job record and the export commands are
+recorded in the owning App Composer repository at .artwork/tiles-v5.json,
+.artwork/masters/tile-linkcheck-v5.result.json and .artwork/export-v5.sh. FAL_AI_API_KEY is read
+from the local environment by scripts/generate-app-art.mjs; it is never printed, never written to
+a manifest, never committed and never shipped to the browser.
+
+Art direction (supersedes the rejected 17 October cut-paper set): original adult-animated science
+fiction with confident dark ink contours, hard-edged cel shading in two flat tone steps, drawn
+perspective and one clear focal event. Scene: a cramped orbital diagnostic bay where a lanky alien
+technician traces a glowing cyan cable from a wall socket to a battered communications dish; the
+cable meets a cracked, blackened connector with one small orange spark, and the wall trace stops at
+the fault. Controlled cyan, deep ink navy, warm off-white, one orange fault accent. A small
+maintenance robot holds up a tiny flag and points at the break. Entirely illustrated; no
+photograph, no 3D render, no glow haze and no text baked into the image.
+
+Files in this repository, all exported from the master at review time:
+- linkcheck-art-v4-master.png — the reviewed master, square; byte-identical to the reviewed
+  .artwork/masters/tile-linkcheck-v5.png recorded by App Composer.
+- linkcheck-art-v4-480.webp and linkcheck-art-v4-960.webp — 480px and 960px page hero derivatives
+  with a reserved 1:1 layout box.
+- linkcheck-share-v4.jpg — 1200x630 JPEG social derivative, composed with deterministic typography
+  from the reviewed master. The same bytes are this app's card in the App Composer catalogue.
+- linkcheck-share-v4.webp and linkcheck-share-v4-600.webp — 1200x630 and 600x315 WebP variants.
+- apps/linkcheck-small-v4.webp — 96px navigation crop of the same artwork.
+
+The illustration is explicitly separate from the tool's results: it is never presented as a
+screenshot, an inspection result or a vendor interface.
+
+mark.svg and icon.png are authored, not generated: hand-written SVG geometry in the same family
+grammar (ivory tile, ink border, one ink subject and one accent — here a cyan magnifier over a page
+with a small orange fault bolt), plus a 512px rendering of that mark for the apple-touch icon.
+
+Superseded in this release and removed from the repository: the 17 October 2026 cut-paper
+linkcheck-art-v3 master, 480/960 derivatives, share cards, 96px crops and the v1 magnifier tile.
+Their bytes and prompts remain in this repository's git history.
+
+Licence for these original project assets: MIT, like this repository.
