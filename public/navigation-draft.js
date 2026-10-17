@@ -1,4 +1,5 @@
-// Generated from src/browser/navigation-draft.ts. MIT.
+// Generated from checked TypeScript; edit src/browser or src/publisher.mts. MIT.
+import { inspectionReport, } from "./inspection-report.js";
 const property = "composerLinkcheckDraft";
 const record = (value) => Boolean(value) && typeof value === "object" && !Array.isArray(value);
 const text = (value, max = 8192) => typeof value === "string" && value.length <= max;
@@ -108,7 +109,7 @@ export function validatedReport(value) {
                     typeof heading.level === "number" &&
                     text(heading.text))))
             return null;
-        return JSON.parse(JSON.stringify(value));
+        return inspectionReport(JSON.parse(JSON.stringify(value)));
     }
     catch {
         return null;

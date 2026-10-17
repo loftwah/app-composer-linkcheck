@@ -1,0 +1,68 @@
+{
+  "app": "linkcheck",
+  "identity": "linkcheck",
+  "selectedBy": "coordinating implementation agent under delegated family refinement",
+  "date": "2026-10-18",
+  "generatedIdentitySelection": "exec-f29d72e0-ce75-4917-8029-457c2dfc2ef6.png",
+  "drawingPurpose": "The cyan cable and faulty connector represent inspected page/share evidence.",
+  "shareCardPurpose": "Link Check: inspect site icons, share previews and SEO. A technician traces a cyan cable to a faulty connector in an orbital bay.",
+  "files": {
+    "public/brand/linkcheck-share-20261018.jpg": "8cb94b790018f1d2ed374c052fa3f9e215004700ca65c223bf5aa673fefc4167",
+    "public/brand/linkcheck-share-20261018.webp": "a84b36690813e68a6bb3a2676aaaf2391482d656dc4953e12d9dd9ce7d5d2fad",
+    "public/brand/linkcheck-share-20261018-600.webp": "1a90cd5ee08e507b22f22c5b1d5e0894db44f11e775f94c5732c1713e84e1540",
+    "public/brand/linkcheck-identity-20261018-master.png": "57a45b7817d19dbd0e6126e4e9f48d65be8c1608ecf1ad88b58c08aaa2940e98",
+    "public/brand/linkcheck-icon-20261018-16.png": "a6f1de6a4dead187306fa82eed0c9d8ec99463b2a27d5b85076bf7c9f906d2f2",
+    "public/brand/linkcheck-icon-20261018-32.png": "dc112c377b9c4eb28196fd7a0efad112d74e96f6eb14955c3bde2f6dbfc961b9",
+    "public/brand/linkcheck-icon-20261018-48.png": "b64bd92f142901956f9f03598aeaf92c62c622812bf3fac8eec29a8ee3b8fa79",
+    "public/brand/linkcheck-icon-20261018-96.png": "507d3da71c9a074a4f5e1d86d5d11a9a7a9d66e1d2a724a744c5861f19e26f6e",
+    "public/brand/linkcheck-icon-20261018-180.png": "7d7ac7a196f589a85ca86e54106513f195d022c1d6156d4abd28517281ea9642",
+    "public/brand/linkcheck-icon-20261018-192.png": "cf7153db0b653aa43e9c544a778656591c7b1d72ca0a4cec5838b97ef458c588",
+    "public/brand/linkcheck-icon-20261018-512.png": "8d8e841ac50a97d2c5a2df21402131544d7846afebac55c30c318c279046cdf0",
+    "public/brand/apps/herethere-small-20261018.webp": "4fec95fe6cfccd8b901c8f424599f4cb57aea6ad2eb11f56e79b95a57260b568",
+    "public/brand/apps/linkcheck-small-20261018.webp": "be9d5e7b8f24ec6d8b8d073075e3208dbd3e68afc78ecc00c9184882f98b0326",
+    "public/brand/apps/hello-small-20261018.webp": "c2aef7354c04affc6060d095912307794cc5436acff8a45d26c913b989222db1",
+    "public/brand/apps/carryforward-small-20261018.webp": "d684c61b50c8f1c44eefc376c232fb9192c40d4b80365eb971a3ad1684add88c",
+    "public/brand/apps/linkarooie-small-20261018.webp": "b9b0cad6ce37c35a8a43899b30834bc001ae1a9c7acff4997a16467cd442d033",
+    "public/brand/composer-icon-20261018-96.png": "b20dd22c890237c48a1e47e81fef1e715b5d77968bdeeb624ba0eceb1ae47b66"
+  },
+  "sourceSceneMasterPreserved": true,
+  "configuredOwnerContentChanged": false,
+  "generationPrompt": {
+    "tool": "built-in image_gen",
+    "authority": "Agent-selected optical artwork based on the existing illustrated world. Qualified MP acceptance applies only to the locked Linkarooie curator; do not call the entire family MP-approved.",
+    "app": {
+      "prompt": "Use case: illustration-story. Create one optical application identity icon for Link Check, derived from the supplied existing space-technician scene. The image is a style and object reference. One meaningful close-up: a long pale olive alien hand steadies a thick cyan cable at a visibly scorched, slightly crooked cream industrial socket. The connector is almost seated; one tiny sharp burnt-orange spark escapes from the bad contact. Its expression is in the precarious mechanism, no face or head. The cable forms a strong hooked silhouette around the socket. Make the connector, pressing fingers and one bad contact fill 85 percent of the square. Deep navy/plum plain background, controlled cel colours, confident irregular black ink contour, warm aged cream casing and flat cyan cable. Adult science-fiction animation, hand-built machinery with dry tactile character. Preserve the reference world's anatomy and device vocabulary. Design to be readable at32px with broad silhouettes and a single clear action. No lettering, UI, magnifier clip-art, tick/check symbol, logos, frames, rounded app tile, cute robot, 3D, glossy toy rendering, glow halo, gradients or decorative circuitry.",
+      "reference": "brand/linkcheck-art-v4-master.png",
+      "intent": "Optical illustration of the existing app's specific action; no new character or hero replacement."
+    },
+    "composerReturnIdentity": {
+      "prompt": "Use case: illustration-story. Create one optical application identity icon for App Composer, software assembled from independent apps. Input is the exact existing factory's machinery/style reference. One specific close-up moment: the peculiar black two-finger industrial robot gripper with orange circular knuckle is sliding a warm-cream plug-in application module into the waiting rail of another cream module; a little green status lamp has just lit where the contacts meet. Keep it visibly physical, with a broad dark side latch and one small cyan blank display, referencing the actual factory modules. Give the approaching gripper and two partially engaged modules a clear asymmetrical interlocking silhouette with an open gap, rather than a generic cube logo. Tight square, machinery fills85percent; broad readable contours, black confident ink, flat warm cream, muted orange joints, a single green lamp. Background plain deep charcoal plum. Adult science-fiction cel drawing, worn inventive machinery and dry practical charm. No character face, text, letters, UI, vendor branding, arbitrary interlocking-square pictogram, generic cube, frame, rounded app tile, cute robot, glossy toy rendering, 3D, glow halo, gradients or tiny circuitry. The device assembly action must read at32px.",
+      "reference": "brand/hero-composer-v5-1600.webp",
+      "intent": "Optical illustration of the existing app's specific action; no new character or hero replacement."
+    },
+    "source": {
+      "repository": "https://github.com/loftwah/app-composer",
+      "path": ".artwork/identity-prompts-20261018.json",
+      "sha256": "1dd7c4d5b826dd0d7406debd6a3489cd6599bd72e681d885eb843704d0055e62",
+      "gitBlob": "2515e0c67ab1603c56fa7d1a799d2bfd3dec04ef"
+    }
+  },
+  "preservedSceneSource": {
+    "path": "public/brand/linkcheck-art-v4-master.png",
+    "sha256": "9fbd648d78810e28e6ca8de7835bdb828937f52eea07ad783d481c6588a634ce"
+  },
+  "sharingRenderer": {
+    "repository": "https://github.com/loftwah/app-composer",
+    "renderer": ".artwork/og/render-card-templates.mjs",
+    "rendererSHA256": "2cd04451e8727544ac3cf36e1273f12a84f2df34bfcd2df28555ad60d282f7dd",
+    "template": ".artwork/og/share-card-v5.html",
+    "templateSHA256": "c43b78124cdb675e9cca3b7c5a61d364832aa4787f7de384c420b0b58d1a2349",
+    "renderRecordSHA256": "277b24e4b14e25a66ee6c9b305cba51ecef30d22bd32659f2e1d46d8fb18ca0e",
+    "fontSHA256": "61d00a1c57fcd7d4826c7a69cd85b61d15d133d5471d3c9c4731d70193d9f71f",
+    "dimensions": [
+      1200,
+      630
+    ],
+    "ledePixels": 32
+  }
+}

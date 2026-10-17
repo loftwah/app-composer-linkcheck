@@ -1,7 +1,10 @@
+import {
+  inspectionReport,
+  type InspectionReport,
+} from "./inspection-report.js";
 // MIT. Tab-history recovery for public inspection data. No HTML snapshots,
 // credentials, persistent browser storage, network retries or background work.
 type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
-type JsonObject = { [key: string]: Json };
 const property = "composerLinkcheckDraft";
 const record = (value: unknown): value is Record<string, unknown> =>
   Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -52,7 +55,7 @@ function jsonData(value: unknown, depth = 0): value is Json {
 }
 // Validate every shape/URL the existing renderer reads as a control or image.
 // Other bounded evidence remains inert JSON displayed with textContent.
-export function validatedReport(value: unknown): JsonObject | null {
+export function validatedReport(value: unknown): InspectionReport | null {
   try {
     if (
       new TextEncoder().encode(JSON.stringify(value)).length > 256 * 1024 ||
@@ -136,7 +139,7 @@ export function validatedReport(value: unknown): JsonObject | null {
         ))
     )
       return null;
-    return JSON.parse(JSON.stringify(value)) as JsonObject;
+    return inspectionReport(JSON.parse(JSON.stringify(value)));
   } catch {
     return null;
   }
@@ -174,7 +177,7 @@ export function rememberPending(pending: boolean) {
   update({ report: null, pending });
 }
 export function restoredInspection(): {
-  report: JsonObject | null;
+  report: InspectionReport | null;
   pending: boolean;
   draftOmitted: boolean;
 } {

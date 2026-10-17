@@ -5,15 +5,20 @@
   "type": "module",
   "packageManager": "pnpm@12.8.1",
   "scripts": {
-    "dev": "wrangler dev --port 4330",
-    "check": "node scripts/identity.mjs && tsc --noEmit && node scripts/browser-assets.mjs --check",
+    "dev": "pnpm source:write && wrangler dev --config wrangler.jsonc --env= --port 4330",
+    "check": "pnpm check:types && pnpm lint && pnpm format:check && pnpm test",
     "test": "node scripts/identity.mjs && node --experimental-strip-types --test tests/*.test.mjs",
     "test:metadata": "node --experimental-strip-types --test tests/metadata.test.mjs",
     "test:fetch": "node --experimental-strip-types --test tests/fetch.test.mjs",
-    "build": "node scripts/identity.mjs && node scripts/browser-assets.mjs --check && wrangler deploy --dry-run --outdir dist",
+    "build": "pnpm check:types && wrangler deploy --config wrangler.jsonc --env= --dry-run --outdir dist",
     "deploy": "node scripts/deploy.mjs",
     "test:identity": "node --experimental-strip-types --test tests/identity.test.mjs",
-    "test:diagnostics": "node --experimental-strip-types --test tests/diagnostics.test.mjs"
+    "test:diagnostics": "node --experimental-strip-types --test tests/diagnostics.test.mjs",
+    "source:write": "node scripts/identity.mjs && node scripts/build-source.mjs --write",
+    "check:types": "node scripts/identity.mjs && node scripts/build-source.mjs --check",
+    "lint": "node scripts/identity.mjs && node scripts/build-source.mjs --lint",
+    "format:check": "node scripts/format-source.mjs --check",
+    "format": "node scripts/format-source.mjs --write"
   },
   "dependencies": {
     "effect": "4.0.4",
@@ -23,6 +28,10 @@
   "devDependencies": {
     "wrangler": "4.143.1",
     "typescript": "6.0.3",
-    "@cloudflare/workers-types": "5.20260929.1"
+    "@cloudflare/workers-types": "5.20260929.1",
+    "prettier": "3.9.10"
+  },
+  "engines": {
+    "node": ">=22 <23"
   }
 }

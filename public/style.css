@@ -1,6 +1,7 @@
 @font-face {
   font-family: Space;
-  src: url("/space.woff2") format("woff2");
+  src: url("/space-latin-20261018.woff2") format("woff2");
+  font-weight: 300 700;
   font-display: swap;
 }
 :root {
