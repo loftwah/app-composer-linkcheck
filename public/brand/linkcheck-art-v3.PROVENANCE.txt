@@ -1,0 +1,60 @@
+Original App Composer cut-paper artwork — Link Check
+Reviewed 17 October 2026.
+
+Source: one generated raster, "tile-linkcheck-v3", produced through the fal.ai queue endpoint
+openai/gpt-image-2.5/sunburst/text-to-image under MP's authorisation, request
+01a147db-5c32-7a52-aa46-921868e021f2. The request itself, its prompt, the cost basis and the
+review of every rejected image are recorded in the owning App Composer repository at
+public/brand/apps/provenance.json and .artwork/tiles-direction-a.json. FAL_AI_API_KEY is read
+from the environment by scripts/generate-app-art.mjs; it is never printed, never written to a
+manifest, never committed and never shipped to the browser.
+
+Art direction: App Composer cut-paper screenprint — warm ivory paper #f4f0e8, graphite ink
+#252923, burnt orange #d95022, with teal #2f9fbd as this app's accent and signal orange #ff9b55
+inside the lens. Flat shapes, ink-lined paper edges, coarse screenprint grain, deliberate
+registration offset. No shading, perspective, gloss, gradients or glow. Subject: one teal paper
+magnifier ring with a short straight handle lying over a pale ivory page card; inside the ring a
+single burnt-orange paper rectangle shows one flat hill curve and one round sun, and two
+graphite rules run across the card beneath it. The magnifier stands for inspection and is never
+presented as a screenshot, a browser window or a platform result.
+
+Files in this repository, all exported from the master at review time:
+- linkcheck-art-v3-master.png — the reviewed master, square (1024px); byte-identical to the
+  reviewed .artwork/masters/tile-linkcheck-v3.png recorded by App Composer.
+- linkcheck-art-v3-480.webp and linkcheck-art-v3-960.webp — 480px and 960px page hero
+  derivatives, one square tile with a reserved 1:1 layout box and a 1px hairline border.
+- linkcheck-share-v3.jpg — 1200x630 JPEG social derivative. The same bytes are this app's card
+  in the App Composer catalogue (public/brand/apps/linkcheck-share-v3.jpg there), so the product
+  page and the catalogue describe the app with one card.
+- linkcheck-share-v3.webp and linkcheck-share-v3-600.webp — 1200x630 and 600x315 WebP variants.
+- apps/linkcheck-small-v3.webp — 96px navigation crop of the same square artwork, alongside the
+  other four apps' crops for this app's own app switcher.
+
+Dimensions are reserved in the markup. The illustration is explicitly separate from the
+inspection: it is never presented as an inspected page, its preview or a platform acceptance
+result.
+
+mark.svg and icon.png are authored, not generated: hand-written SVG geometry of the page card,
+lens, landscape panel and rules in the same paper grammar, plus a 512px flat ivory rendering of
+that same mark for apple-touch-icon. No traced third-party mark, vendor icon or platform logo is
+used.
+
+Superseded in this release and removed from the repository: the 14 October 2026 glossy
+linkcheck-art.jpg poster and its provenance note, which showed an orange glass lens over a
+linked graphite object; the unreferenced composer-art.jpg and composer-mark.svg pair; and the
+13 October standalone icon.svg, replaced by mark.svg and icon.png. Their bytes, prompts and the
+original generated master path remain in this repository's git history; the reviewed App
+Composer record keeps the comparison note.
+
+Licence for these original project assets: MIT, like this repository.
+
+SHA-256 of the files in this release:
+- linkcheck-art-v3-master.png: 1cc6d83226753a2f6dab4ee0e2bf48a7d80af82d6da970d6acd47667e1541386
+- linkcheck-art-v3-960.webp: e51a2279b12bf85143c5e39e56763d10f799fecea1de2f0bcb76b7fa4d2f167c
+- linkcheck-art-v3-480.webp: 5b0d04242217ab7096a4da3f993030afcebd1f278254b8d268b76db3557ed575
+- linkcheck-share-v3.jpg: bd7c6c8a1211203f51831e61848fdb2beaadf659dfdcc8fe08228b54c71dc7b0
+- linkcheck-share-v3.webp: 252c100cfe793f939e09bc3459d6933567f12fb053b6db9538e8ef729850d6ea
+- linkcheck-share-v3-600.webp: 8c069188cbbde81932d7d41e34e719f0fc2770814de72969de06a5486cb45d21
+- mark.svg: 354a3cc53a0752f885a50523be6d17de736d2c240154145ab17e2e2b703ba55c
+- icon.png: 1326585c7507a1804409ef5021eb92a1015976b3fdd832426a271fed8821a75b
+- apps/linkcheck-small-v3.webp: d07d796e82a9adbcf4418fd7ec2f8ca2d60a09a5e75d9bae2de892095b3db1dc

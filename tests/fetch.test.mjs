@@ -57,6 +57,54 @@ test("announced and streamed oversized bodies stop inspection", async () => {
       (error) => error._tag === "TooLarge",
     );
 });
+test("every fetch failure tells the operator what to do next", async () => {
+  const cases = [
+    [new Response(null, { status: 404 }), /HTTP 404[\s\S]*inspect a page that exists/i],
+    [new Response(null, { status: 503 }), /HTTP 503[\s\S]*temporary/i],
+    [new Response(null, { status: 403 }), /HTTP 403[\s\S]*inspect again/i],
+  ];
+  for (const [response, expected] of cases)
+    await assert.rejects(
+      boundedFetch(
+        "https://composer.loftwah.com/",
+        1024,
+        signal(),
+        async () => response,
+      ),
+      (error) => {
+        assert.equal(error._tag, "FetchFailed");
+        assert.match(error.message, expected);
+        return true;
+      },
+    );
+  await assert.rejects(
+    Effect.runPromise(
+      inspect("https://composer.loftwah.com/", async () => {
+        throw new Error("socket closed");
+      }),
+    ),
+    (error) => {
+      assert.equal(error._tag, "FetchFailed");
+      assert.match(error.message, /public requests[\s\S]*again/i);
+      assert.doesNotMatch(error.message, /socket closed/);
+      return true;
+    },
+  );
+});
+test("oversized bodies name the recovery step without echoing provider text", async () => {
+  await assert.rejects(
+    boundedFetch(
+      "https://composer.loftwah.com/",
+      3,
+      signal(),
+      async () => new Response("oversize"),
+    ),
+    (error) => {
+      assert.match(error.message, /byte limit[\s\S]*large download/i);
+      return true;
+    },
+  );
+});
 test("actual bytes determine dimensions; different X and OG assets remain separate and image failure remains explicit", async () => {
   const png = Uint8Array.from(
     Buffer.from(

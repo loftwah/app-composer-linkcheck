@@ -219,12 +219,20 @@ button:disabled {
 }
 .empty figure {
   margin: 0;
+  min-width: 0;
+  /* The reviewed square tile, not a wide banner: same reserved 1:1 box and
+     hairline as the other shipped apps, sized to balance the short empty-state
+     copy rather than dominate the first screen. */
+  max-width: 400px;
+  justify-self: center;
 }
 .empty img {
   display: block;
   width: 100%;
   height: auto;
-  border-radius: 8px;
+  aspect-ratio: 1/1;
+  border: 1px solid var(--border);
+  border-radius: 6px;
 }
 .empty figcaption {
   font-size: 12px;
@@ -459,6 +467,13 @@ footer p {
   font-size: 14px;
   margin: 12px 0;
   color: var(--muted);
+}
+/* A failed inspection is a message, not a whisper: it carries the same weight as
+   the form it came from and names the next step. */
+#status[data-state="failed"] {
+  color: var(--fg);
+  border-left: 3px solid var(--accent);
+  padding-left: 12px;
 }
 @media (max-width: 800px) {
   header {
