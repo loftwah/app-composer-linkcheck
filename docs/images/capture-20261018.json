@@ -1,0 +1,42 @@
+{
+  "capturedAt": "2026-10-18T01:11:19.744Z",
+  "kind": "actual production public UI; fictional content remains labelled by the app",
+  "records": [
+    {
+      "id": "linkcheck",
+      "url": "https://share.loftwah.com/",
+      "width": 1440,
+      "height": 960,
+      "source": "3cfedf45e24095c4c16a48fbf8abba33b67bb668",
+      "file": "docs/images/public-inspection-20261018.png",
+      "requestOverrides": false,
+      "verificationHeader": true,
+      "title": "Link Check \u00b7 Site identity, SEO and share previews",
+      "heading": "Check how your site shows up.",
+      "theme": "dark",
+      "overflow": false,
+      "appsButton": true,
+      "sha256": "2c22c3ef9d26c770f2ff44d371ee37ba6682fdcb22111e717a5f32a97440da0e",
+      "bytes": 369450,
+      "captureFile": "linkcheck-1440.png"
+    },
+    {
+      "id": "linkcheck",
+      "url": "https://share.loftwah.com/",
+      "width": 390,
+      "height": 844,
+      "source": "3cfedf45e24095c4c16a48fbf8abba33b67bb668",
+      "file": "docs/images/public-inspection-20261018-phone.png",
+      "requestOverrides": false,
+      "verificationHeader": true,
+      "title": "Link Check \u00b7 Site identity, SEO and share previews",
+      "heading": "Check how your site shows up.",
+      "theme": "dark",
+      "overflow": false,
+      "appsButton": true,
+      "sha256": "0dd7cf5b756a7ca4e3038ae4f27facac108df2022d8c2cc0272ad176607ba3d7",
+      "bytes": 59928,
+      "captureFile": "linkcheck-390.png"
+    }
+  ]
+}

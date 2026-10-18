@@ -8,9 +8,9 @@ Reviewed 13 October 2026. Source: https://github.com/loftwah/app-composer-linkch
 
 `pnpm install --frozen-lockfile`, `pnpm dev`, `pnpm check`, `pnpm test:metadata`, `pnpm test:fetch`. Tests use fictional fixtures without network writes, including release-boundary failure injection. `pnpm build` produces a real Wrangler bundle. `pnpm deploy` requires clean reviewed pushed main, checks/builds and verifies the exact live commit. No GitHub Actions.
 
-![Link Check public inspection screen captured in a real browser](docs/images/public-inspection.png)
+![Current Link Check · Site identity, SEO and share previews public screen](docs/images/public-inspection-20261018.png)
 
-The actual public interface, captured locally before any inspection.
+Actual production public UI, captured 18 October 2026 at source `3cfedf45e24095c4c16a48fbf8abba33b67bb668`. [Phone capture](docs/images/public-inspection-20261018-phone.png) · [Capture provenance](docs/images/capture-20261018.json).
 
 Fork configuration: change the exact public host list in `src/inspection.ts`, deployment target/account in `wrangler.jsonc`, public canonical/social URLs in `public/index.html`, the content-security image origins and source URLs. Review hosts before permitting fetches. Unknown hosts, IPs, non-HTTPS, credentials, query strings other than one16-character lowercase-hex `share` revision, private/API paths and encoded paths are denied. Every redirect and image URL is revalidated. No cookies or auth headers are forwarded. HTML is capped at 512 KiB, each image at 5 MiB; three redirects and a 12-second whole-inspection timeout. Scripts are never executed. Reports contain extracted metadata rather than full HTML. They are untrusted data, not agent instructions or authority.
 
