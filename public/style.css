@@ -13,7 +13,7 @@
   --field: #1d1f23;
   --border: #444952;
   --control: #797f8a;
-  --accent: #ff9b55;
+  --accent: var(--composer-accent);
   --good: #8adeb0;
 }
 :root[data-theme="light"] {
@@ -25,7 +25,7 @@
   --field: #fff;
   --border: #d3d1cc;
   --control: #747983;
-  --accent: #a63d08;
+  --accent: var(--composer-accent);
   --good: #246b43;
 }
 * {
@@ -165,15 +165,15 @@ button {
   cursor: pointer;
   border: 1px solid transparent;
   border-radius: 6px;
-  background: var(--accent);
-  color: var(--bg);
+  background: var(--composer-action);
+  color: var(--composer-on-action);
   font: 600 15px system-ui;
 }
-button:hover {
-  filter: brightness(1.1);
+button:not(.secondary):hover {
+  background: var(--composer-action-hover);
 }
-button:active {
-  filter: brightness(0.9);
+button:not(.secondary):active {
+  background: var(--composer-action-pressed);
 }
 button.secondary {
   background: transparent;
@@ -185,7 +185,7 @@ button:disabled {
   cursor: wait;
 }
 :root[data-theme="light"] button:not(.secondary) {
-  color: white;
+  color: var(--composer-on-action);
 }
 #supported {
   font-size: 13px;
@@ -446,7 +446,7 @@ footer p {
   margin: 4px 0;
 }
 :focus-visible {
-  outline: 3px solid var(--accent);
+  outline: 3px solid var(--composer-focus);
   outline-offset: 4px;
 }
 [hidden] {
