@@ -1,0 +1,564 @@
+{
+  "contract": 1,
+  "kind": "effect-batch-trace",
+  "engine": {
+    "repository": "https://github.com/loftwah/app-composer-linkcheck",
+    "module": "src/batch.ts",
+    "runner": "runBatch",
+    "tests": "tests/batch.test.mjs",
+    "effect": "4.0.4",
+    "node": "22",
+    "generatedBy": "scripts/effect-demo-fixtures.mjs",
+    "label": "Recorded by executing the batch runner with scripted inspectors. No network request was made and no result is a live inspection.",
+    "synthetic": true
+  },
+  "limits": {
+    "targets": 4,
+    "concurrency": 2,
+    "attemptsPerTarget": 2,
+    "retry": "read-only transport failures only",
+    "persisted": false
+  },
+  "scenarios": [
+    {
+      "id": "ready",
+      "name": "Three pages, two at a time",
+      "question": "Can one run check a few published pages without hammering the origin?",
+      "expectation": "completed",
+      "request": {
+        "contract": 1,
+        "targets": [
+          "https://share.loftwah.com/",
+          "https://composer.loftwah.com/learn",
+          "https://guestbook.loftwah.com/"
+        ]
+      },
+      "scope": "reviewed",
+      "blocksAt": null,
+      "script": "every read succeeds",
+      "outcome": {
+        "kind": "report",
+        "report": {
+          "status": "complete",
+          "totals": {
+            "verified": 3,
+            "failed": 0,
+            "uncertain": 0,
+            "attempts": 3
+          },
+          "recovery": "Every page was read in this run. Review the findings before sharing.",
+          "limits": {
+            "targets": 4,
+            "concurrency": 2,
+            "attemptsPerTarget": 2,
+            "attemptTimeout": "12 seconds",
+            "retry": "read-only transport failures only",
+            "persisted": false
+          },
+          "targets": [
+            {
+              "target": "https://share.loftwah.com/",
+              "label": "Link Check home",
+              "status": "verified",
+              "attempts": 1,
+              "code": "Inspected",
+              "message": "12 findings: 1 to fix, 2 to review, 9 passed. 2 share images verified.",
+              "recovery": "Review the findings before sharing. No retry is needed.",
+              "reconciled": false,
+              "findings": {
+                "pass": 9,
+                "fix": 1,
+                "review": 2
+              },
+              "images": {
+                "verified": 2,
+                "failed": 0,
+                "missing": 1
+              },
+              "bytes": 24800
+            },
+            {
+              "target": "https://composer.loftwah.com/learn",
+              "label": "Composer: Learn",
+              "status": "verified",
+              "attempts": 1,
+              "code": "Inspected",
+              "message": "16 findings: 0 to fix, 3 to review, 13 passed. 2 share images verified.",
+              "recovery": "Review the findings before sharing. No retry is needed.",
+              "reconciled": false,
+              "findings": {
+                "pass": 13,
+                "fix": 0,
+                "review": 3
+              },
+              "images": {
+                "verified": 2,
+                "failed": 0,
+                "missing": 0
+              },
+              "bytes": 31200
+            },
+            {
+              "target": "https://guestbook.loftwah.com/",
+              "label": "Guestbook home",
+              "status": "verified",
+              "attempts": 1,
+              "code": "Inspected",
+              "message": "8 findings: 1 to fix, 0 to review, 7 passed. 1 share image verified.",
+              "recovery": "Review the findings before sharing. No retry is needed.",
+              "reconciled": false,
+              "findings": {
+                "pass": 7,
+                "fix": 1,
+                "review": 0
+              },
+              "images": {
+                "verified": 1,
+                "failed": 1,
+                "missing": 1
+              },
+              "bytes": 19600
+            }
+          ]
+        }
+      },
+      "observed": {
+        "inspectorCalls": 3,
+        "peakConcurrency": 2,
+        "attempts": {
+          "https://share.loftwah.com/": 1,
+          "https://composer.loftwah.com/learn": 1,
+          "https://guestbook.loftwah.com/": 1
+        }
+      },
+      "phases": [
+        {
+          "id": "validate",
+          "title": "Request validated",
+          "detail": "Contract 1 decoded with a Schema; 3 targets accepted and the request stayed inside the 4-target limit.",
+          "state": "pass",
+          "reads": 0
+        },
+        {
+          "id": "authorise",
+          "title": "Reviewed hosts checked",
+          "detail": "Every hostname was compared with the reviewed public list before any read.",
+          "state": "pass",
+          "reads": 0
+        },
+        {
+          "id": "deduplicate",
+          "title": "Duplicate pages rejected",
+          "detail": "Each page identity was compared after normalising the URL, including share-revision queries.",
+          "state": "pass",
+          "reads": 0
+        },
+        {
+          "id": "inspect",
+          "title": "2 of 2 reads in flight",
+          "detail": "The runner started 3 reads and never exceeded the concurrency limit of 2. Each attempt had its own timeout, and an interrupt cancels the transport.",
+          "state": "pass",
+          "reads": 3
+        },
+        {
+          "id": "classify",
+          "title": "Every page read",
+          "detail": "3 verified, 0 failed, 0 uncertain after 3 attempts. One failure never discards another page's result.",
+          "state": "pass",
+          "reads": 3
+        },
+        {
+          "id": "recover",
+          "title": "Recovery stated",
+          "detail": "Every page was read in this run. Review the findings before sharing.",
+          "state": "pass",
+          "reads": 3
+        }
+      ]
+    },
+    {
+      "id": "permission",
+      "name": "A host is revoked",
+      "question": "What happens when the reviewed list no longer includes a page?",
+      "expectation": "refused",
+      "request": {
+        "contract": 1,
+        "targets": [
+          "https://share.loftwah.com/",
+          "https://guestbook.loftwah.com/"
+        ]
+      },
+      "scope": "guestbook removed from the reviewed list",
+      "blocksAt": "authorise",
+      "script": "never called",
+      "outcome": {
+        "kind": "refused",
+        "code": "TargetNotPermitted",
+        "message": "The reviewed host list does not permit this target. Inspect a permitted page or change the list in reviewed source.",
+        "target": "https://guestbook.loftwah.com/"
+      },
+      "observed": {
+        "inspectorCalls": 0,
+        "peakConcurrency": 0,
+        "attempts": {
+          "https://share.loftwah.com/": 0,
+          "https://guestbook.loftwah.com/": 0
+        }
+      },
+      "phases": [
+        {
+          "id": "validate",
+          "title": "Request validated",
+          "detail": "Contract 1 decoded with a Schema; 2 targets accepted and the request stayed inside the 4-target limit.",
+          "state": "pass",
+          "reads": 0
+        },
+        {
+          "id": "authorise",
+          "title": "Reviewed hosts checked",
+          "detail": "The reviewed host list does not permit this target. Inspect a permitted page or change the list in reviewed source.",
+          "state": "block",
+          "reads": 0,
+          "code": "TargetNotPermitted",
+          "blocked": true
+        }
+      ]
+    },
+    {
+      "id": "duplicate",
+      "name": "The same page twice",
+      "question": "Can a shared revision hide a duplicate target?",
+      "expectation": "refused",
+      "request": {
+        "contract": 1,
+        "targets": [
+          "https://composer.loftwah.com/showcase",
+          "https://composer.loftwah.com/showcase?share=abcdef0123456789"
+        ]
+      },
+      "scope": "reviewed",
+      "blocksAt": "deduplicate",
+      "script": "never called",
+      "outcome": {
+        "kind": "refused",
+        "code": "DuplicateTarget",
+        "message": "The same public page appears twice in this batch. Keep one entry per page and remove the duplicate.",
+        "target": "https://composer.loftwah.com/showcase?share=abcdef0123456789"
+      },
+      "observed": {
+        "inspectorCalls": 0,
+        "peakConcurrency": 0,
+        "attempts": {
+          "https://composer.loftwah.com/showcase": 0,
+          "https://composer.loftwah.com/showcase?share=abcdef0123456789": 0
+        }
+      },
+      "phases": [
+        {
+          "id": "validate",
+          "title": "Request validated",
+          "detail": "Contract 1 decoded with a Schema; 2 targets accepted and the request stayed inside the 4-target limit.",
+          "state": "pass",
+          "reads": 0
+        },
+        {
+          "id": "authorise",
+          "title": "Reviewed hosts checked",
+          "detail": "Every hostname was compared with the reviewed public list before any read.",
+          "state": "pass",
+          "reads": 0
+        },
+        {
+          "id": "deduplicate",
+          "title": "Duplicate pages rejected",
+          "detail": "The same public page appears twice in this batch. Keep one entry per page and remove the duplicate.",
+          "state": "block",
+          "reads": 0,
+          "code": "DuplicateTarget",
+          "blocked": true
+        }
+      ]
+    },
+    {
+      "id": "timeout",
+      "name": "One origin stops answering",
+      "question": "Does a stalled read hold up the other pages or produce a fake pass?",
+      "expectation": "completed",
+      "request": {
+        "contract": 1,
+        "targets": [
+          "https://share.loftwah.com/",
+          "https://guestbook.loftwah.com/",
+          "https://composer.loftwah.com/learn"
+        ]
+      },
+      "scope": "reviewed",
+      "blocksAt": null,
+      "script": "guestbook never answers; each attempt has a 30 ms budget",
+      "outcome": {
+        "kind": "report",
+        "report": {
+          "status": "partial",
+          "totals": {
+            "verified": 2,
+            "failed": 0,
+            "uncertain": 1,
+            "attempts": 4
+          },
+          "recovery": "Re-run the batch for uncertain targets once the origin responds. Verified targets are already recorded in this report.",
+          "limits": {
+            "targets": 4,
+            "concurrency": 2,
+            "attemptsPerTarget": 2,
+            "attemptTimeout": "30 millis",
+            "retry": "read-only transport failures only",
+            "persisted": false
+          },
+          "targets": [
+            {
+              "target": "https://share.loftwah.com/",
+              "label": "Link Check home",
+              "status": "verified",
+              "attempts": 1,
+              "code": "Inspected",
+              "message": "12 findings: 1 to fix, 2 to review, 9 passed. 2 share images verified.",
+              "recovery": "Review the findings before sharing. No retry is needed.",
+              "reconciled": false,
+              "findings": {
+                "pass": 9,
+                "fix": 1,
+                "review": 2
+              },
+              "images": {
+                "verified": 2,
+                "failed": 0,
+                "missing": 1
+              },
+              "bytes": 24800
+            },
+            {
+              "target": "https://guestbook.loftwah.com/",
+              "label": "Guestbook home",
+              "status": "uncertain",
+              "attempts": 2,
+              "code": "AttemptTimeout",
+              "message": "The attempt timed out; 2 attempts were made and none finished.",
+              "recovery": "Run the batch again when the origin responds. A repeated public read is safe, but this attempt is not evidence that the page or its metadata works.",
+              "reconciled": false,
+              "findings": null,
+              "images": null,
+              "bytes": null
+            },
+            {
+              "target": "https://composer.loftwah.com/learn",
+              "label": "Composer: Learn",
+              "status": "verified",
+              "attempts": 1,
+              "code": "Inspected",
+              "message": "16 findings: 0 to fix, 3 to review, 13 passed. 2 share images verified.",
+              "recovery": "Review the findings before sharing. No retry is needed.",
+              "reconciled": false,
+              "findings": {
+                "pass": 13,
+                "fix": 0,
+                "review": 3
+              },
+              "images": {
+                "verified": 2,
+                "failed": 0,
+                "missing": 0
+              },
+              "bytes": 31200
+            }
+          ]
+        }
+      },
+      "observed": {
+        "inspectorCalls": 4,
+        "peakConcurrency": 2,
+        "attempts": {
+          "https://share.loftwah.com/": 1,
+          "https://guestbook.loftwah.com/": 2,
+          "https://composer.loftwah.com/learn": 1
+        }
+      },
+      "phases": [
+        {
+          "id": "validate",
+          "title": "Request validated",
+          "detail": "Contract 1 decoded with a Schema; 3 targets accepted and the request stayed inside the 4-target limit.",
+          "state": "pass",
+          "reads": 0
+        },
+        {
+          "id": "authorise",
+          "title": "Reviewed hosts checked",
+          "detail": "Every hostname was compared with the reviewed public list before any read.",
+          "state": "pass",
+          "reads": 0
+        },
+        {
+          "id": "deduplicate",
+          "title": "Duplicate pages rejected",
+          "detail": "Each page identity was compared after normalising the URL, including share-revision queries.",
+          "state": "pass",
+          "reads": 0
+        },
+        {
+          "id": "inspect",
+          "title": "2 of 2 reads in flight",
+          "detail": "The runner started 4 reads and never exceeded the concurrency limit of 2. Each attempt had its own timeout, and an interrupt cancels the transport.",
+          "state": "pass",
+          "reads": 4
+        },
+        {
+          "id": "classify",
+          "title": "Partial evidence kept",
+          "detail": "2 verified, 0 failed, 1 uncertain after 4 attempts. One failure never discards another page's result.",
+          "state": "review",
+          "reads": 4
+        },
+        {
+          "id": "recover",
+          "title": "Recovery stated",
+          "detail": "Re-run the batch for uncertain targets once the origin responds. Verified targets are already recorded in this report.",
+          "state": "review",
+          "reads": 4
+        }
+      ]
+    },
+    {
+      "id": "recovery",
+      "name": "A temporary failure clears",
+      "question": "Is a retry allowed, and what does it change in the record?",
+      "expectation": "completed",
+      "request": {
+        "contract": 1,
+        "targets": [
+          "https://share.loftwah.com/",
+          "https://guestbook.loftwah.com/"
+        ]
+      },
+      "scope": "reviewed",
+      "blocksAt": null,
+      "script": "guestbook returns HTTP 503 once, then succeeds",
+      "outcome": {
+        "kind": "report",
+        "report": {
+          "status": "complete",
+          "totals": {
+            "verified": 2,
+            "failed": 0,
+            "uncertain": 0,
+            "attempts": 3
+          },
+          "recovery": "Every page was read in this run. Review the findings before sharing.",
+          "limits": {
+            "targets": 4,
+            "concurrency": 2,
+            "attemptsPerTarget": 2,
+            "attemptTimeout": "12 seconds",
+            "retry": "read-only transport failures only",
+            "persisted": false
+          },
+          "targets": [
+            {
+              "target": "https://share.loftwah.com/",
+              "label": "Link Check home",
+              "status": "verified",
+              "attempts": 1,
+              "code": "Inspected",
+              "message": "12 findings: 1 to fix, 2 to review, 9 passed. 2 share images verified.",
+              "recovery": "Review the findings before sharing. No retry is needed.",
+              "reconciled": false,
+              "findings": {
+                "pass": 9,
+                "fix": 1,
+                "review": 2
+              },
+              "images": {
+                "verified": 2,
+                "failed": 0,
+                "missing": 1
+              },
+              "bytes": 24800
+            },
+            {
+              "target": "https://guestbook.loftwah.com/",
+              "label": "Guestbook home",
+              "status": "verified",
+              "attempts": 2,
+              "code": "Inspected",
+              "message": "8 findings: 1 to fix, 0 to review, 7 passed. 1 share image verified.",
+              "recovery": "A repeated read succeeded. Review the findings before sharing; the earlier attempt is not evidence.",
+              "reconciled": true,
+              "findings": {
+                "pass": 7,
+                "fix": 1,
+                "review": 0
+              },
+              "images": {
+                "verified": 1,
+                "failed": 1,
+                "missing": 1
+              },
+              "bytes": 19600
+            }
+          ]
+        }
+      },
+      "observed": {
+        "inspectorCalls": 3,
+        "peakConcurrency": 1,
+        "attempts": {
+          "https://share.loftwah.com/": 1,
+          "https://guestbook.loftwah.com/": 2
+        }
+      },
+      "phases": [
+        {
+          "id": "validate",
+          "title": "Request validated",
+          "detail": "Contract 1 decoded with a Schema; 2 targets accepted and the request stayed inside the 4-target limit.",
+          "state": "pass",
+          "reads": 0
+        },
+        {
+          "id": "authorise",
+          "title": "Reviewed hosts checked",
+          "detail": "Every hostname was compared with the reviewed public list before any read.",
+          "state": "pass",
+          "reads": 0
+        },
+        {
+          "id": "deduplicate",
+          "title": "Duplicate pages rejected",
+          "detail": "Each page identity was compared after normalising the URL, including share-revision queries.",
+          "state": "pass",
+          "reads": 0
+        },
+        {
+          "id": "inspect",
+          "title": "1 of 2 reads in flight",
+          "detail": "The runner started 3 reads and never exceeded the concurrency limit of 2. Each attempt had its own timeout, and an interrupt cancels the transport.",
+          "state": "pass",
+          "reads": 3
+        },
+        {
+          "id": "classify",
+          "title": "Every page read",
+          "detail": "2 verified, 0 failed, 0 uncertain after 3 attempts. One failure never discards another page's result.",
+          "state": "pass",
+          "reads": 3
+        },
+        {
+          "id": "recover",
+          "title": "Recovery stated",
+          "detail": "Every page was read in this run. Review the findings before sharing.",
+          "state": "pass",
+          "reads": 3
+        }
+      ]
+    }
+  ]
+}

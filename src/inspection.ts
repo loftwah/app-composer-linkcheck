@@ -1,4 +1,4 @@
-import { Data, Effect } from "effect";
+import { Data, Effect, type Duration } from "effect";
 import { Parser } from "htmlparser2";
 import { imageSize } from "image-size";
 import { explain, discoveryChecks, imageFindings } from "./diagnostics.ts";
@@ -12,11 +12,19 @@ export const hosts = [
   "ai.loftwah.com",
   "share.loftwah.com",
 ];
+// One whole-inspection budget, covering the page and every dependent asset it
+// declares. Batch attempts apply the same value, so an inspector implementation
+// without its own timeout cannot hang a run.
+export const INSPECTION_TIMEOUT: Duration.Input = "12 seconds";
 export class InvalidTarget extends Data.TaggedError("InvalidTarget")<{
   message: string;
 }> {}
 export class FetchFailed extends Data.TaggedError("FetchFailed")<{
   message: string;
+  // A re-read is safe only when the origin may answer differently: transport
+  // errors, timeouts, 429 and 5xx. A 404 or a disallowed redirect will not
+  // improve by asking again, so callers must not turn this into blind retries.
+  retryable: boolean;
 }> {}
 export class TooLarge extends Data.TaggedError("TooLarge")<{
   message: string;
@@ -75,6 +83,7 @@ export async function boundedFetch(
         throw new FetchFailed({
           message:
             "The redirect chain did not reach a public response within three redirects. Inspect the final public address directly.",
+          retryable: false,
         });
       url = target(new URL(next, url).href);
       redirects.push(url.href);
@@ -92,6 +101,7 @@ export async function boundedFetch(
             : response.status === 429 || response.status >= 500
               ? "That is usually temporary: wait a moment and inspect again."
               : "Check the public address and inspect again."),
+        retryable: response.status === 429 || response.status >= 500,
       });
     }
     if (Number(response.headers.get("content-length")) > limit) {
@@ -145,6 +155,7 @@ export async function boundedFetch(
   throw new FetchFailed({
     message:
       "Unable to reach the target. Check that the hostname is publicly resolvable, then inspect again.",
+    retryable: true,
   });
 }
 export type Finding = {
@@ -702,7 +713,7 @@ export async function identityAssets(
 export function inspect(
   input: string,
   fetcher: typeof fetch = fetch,
-  options: { discovery?: boolean } = {},
+  options: { discovery?: boolean; timeout?: Duration.Input } = {},
 ) {
   return Effect.tryPromise({
     try: async (signal) => {
@@ -874,15 +885,17 @@ export function inspect(
         : new FetchFailed({
             message:
               "The public response could not be read. Check that the origin answers public requests, then inspect again.",
+            retryable: true,
           }),
   }).pipe(
     Effect.timeoutOrElse({
-      duration: "12 seconds",
+      duration: options.timeout ?? INSPECTION_TIMEOUT,
       orElse: () =>
         Effect.fail(
           new FetchFailed({
             message:
-              "Inspection timed out after 12 seconds. Retry when the origin responds.",
+              "Inspection timed out before the origin answered. Retry when the origin responds.",
+            retryable: true,
           }),
         ),
     }),
