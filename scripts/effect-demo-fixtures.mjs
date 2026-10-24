@@ -133,8 +133,8 @@ function basePhases(targets) {
 function inspectionPhase(observed) {
   return {
     id: "inspect",
-    title: `${observed.peak} in flight, ${BATCH_CONCURRENCY} allowed`,
-    detail: `The runner started ${observed.calls} read${observed.calls === 1 ? "" : "s"} and never exceeded the concurrency limit of ${BATCH_CONCURRENCY}. Each attempt had its own timeout; interrupt cancelled the transport.`,
+    title: `${observed.peak} of ${BATCH_CONCURRENCY} reads in flight`,
+    detail: `The runner started ${observed.calls} read${observed.calls === 1 ? "" : "s"} and never exceeded the concurrency limit of ${BATCH_CONCURRENCY}. Each attempt had its own timeout, and an interrupt cancels the transport.`,
     state: "pass",
     reads: observed.calls,
   };

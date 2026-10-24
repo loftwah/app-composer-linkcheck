@@ -155,8 +155,8 @@
         },
         {
           "id": "inspect",
-          "title": "2 in flight, 2 allowed",
-          "detail": "The runner started 3 reads and never exceeded the concurrency limit of 2. Each attempt had its own timeout; interrupt cancelled the transport.",
+          "title": "2 of 2 reads in flight",
+          "detail": "The runner started 3 reads and never exceeded the concurrency limit of 2. Each attempt had its own timeout, and an interrupt cancels the transport.",
           "state": "pass",
           "reads": 3
         },
@@ -406,8 +406,8 @@
         },
         {
           "id": "inspect",
-          "title": "2 in flight, 2 allowed",
-          "detail": "The runner started 4 reads and never exceeded the concurrency limit of 2. Each attempt had its own timeout; interrupt cancelled the transport.",
+          "title": "2 of 2 reads in flight",
+          "detail": "The runner started 4 reads and never exceeded the concurrency limit of 2. Each attempt had its own timeout, and an interrupt cancels the transport.",
           "state": "pass",
           "reads": 4
         },
@@ -539,8 +539,8 @@
         },
         {
           "id": "inspect",
-          "title": "1 in flight, 2 allowed",
-          "detail": "The runner started 3 reads and never exceeded the concurrency limit of 2. Each attempt had its own timeout; interrupt cancelled the transport.",
+          "title": "1 of 2 reads in flight",
+          "detail": "The runner started 3 reads and never exceeded the concurrency limit of 2. Each attempt had its own timeout, and an interrupt cancels the transport.",
           "state": "pass",
           "reads": 3
         },
