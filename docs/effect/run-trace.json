@@ -163,14 +163,7 @@
         {
           "id": "classify",
           "title": "Every page read",
-          "detail": "3 verified, 0 failed, 0 uncertain after 3 attempts. One failure never discards another page's result.",
-          "state": "pass",
-          "reads": 3
-        },
-        {
-          "id": "recover",
-          "title": "Recovery stated",
-          "detail": "Every page was read in this run. Review the findings before sharing.",
+          "detail": "3 verified, 0 failed, 0 uncertain after 3 attempts.",
           "state": "pass",
           "reads": 3
         }
@@ -190,7 +183,8 @@
       },
       "scope": "guestbook removed from the reviewed list",
       "blocksAt": "authorise",
-      "script": "never called",
+      "blockedDetail": "Target 2 of 2 is not on the reviewed list, so the runner stops instead of checking target 1 alone.",
+      "script": "not called; the request is refused before any read",
       "outcome": {
         "kind": "refused",
         "code": "TargetNotPermitted",
@@ -216,7 +210,7 @@
         {
           "id": "authorise",
           "title": "Reviewed hosts checked",
-          "detail": "The reviewed host list does not permit this target. Inspect a permitted page or change the list in reviewed source.",
+          "detail": "Target 2 of 2 is not on the reviewed list, so the runner stops instead of checking target 1 alone.",
           "state": "block",
           "reads": 0,
           "code": "TargetNotPermitted",
@@ -238,7 +232,8 @@
       },
       "scope": "reviewed",
       "blocksAt": "deduplicate",
-      "script": "never called",
+      "blockedDetail": "Target 2 resolves to the same page as target 1, share revision included. Nothing is fetched.",
+      "script": "not called; the request is refused before any read",
       "outcome": {
         "kind": "refused",
         "code": "DuplicateTarget",
@@ -271,7 +266,7 @@
         {
           "id": "deduplicate",
           "title": "Duplicate pages rejected",
-          "detail": "The same public page appears twice in this batch. Keep one entry per page and remove the duplicate.",
+          "detail": "Target 2 resolves to the same page as target 1, share revision included. Nothing is fetched.",
           "state": "block",
           "reads": 0,
           "code": "DuplicateTarget",
@@ -417,13 +412,6 @@
           "detail": "2 verified, 0 failed, 1 uncertain after 4 attempts. One failure never discards another page's result.",
           "state": "review",
           "reads": 4
-        },
-        {
-          "id": "recover",
-          "title": "Recovery stated",
-          "detail": "Re-run the batch for uncertain targets once the origin responds. Verified targets are already recorded in this report.",
-          "state": "review",
-          "reads": 4
         }
       ]
     },
@@ -547,14 +535,7 @@
         {
           "id": "classify",
           "title": "Every page read",
-          "detail": "2 verified, 0 failed, 0 uncertain after 3 attempts. One failure never discards another page's result.",
-          "state": "pass",
-          "reads": 3
-        },
-        {
-          "id": "recover",
-          "title": "Recovery stated",
-          "detail": "Every page was read in this run. Review the findings before sharing.",
+          "detail": "2 verified, 0 failed, 0 uncertain after 3 attempts.",
           "state": "pass",
           "reads": 3
         }

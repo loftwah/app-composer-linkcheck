@@ -149,7 +149,7 @@ function refuse(scenario, { result, observed }) {
   phases[index] = {
     ...phases[index],
     state: "block",
-    detail: error.message,
+    detail: scenario.blockedDetail,
     code: error._tag,
     blocked: true,
   };
@@ -181,14 +181,10 @@ function completed(scenario, { result, observed }) {
         report.status === "complete"
           ? "Every page read"
           : "Partial evidence kept",
-      detail: `${report.totals.verified} verified, ${report.totals.failed} failed, ${report.totals.uncertain} uncertain after ${report.totals.attempts} attempt${report.totals.attempts === 1 ? "" : "s"}. One failure never discards another page's result.`,
-      state: report.status === "complete" ? "pass" : "review",
-      reads: observed.calls,
-    },
-    {
-      id: "recover",
-      title: "Recovery stated",
-      detail: report.recovery,
+      detail:
+        report.status === "complete"
+          ? `${report.totals.verified} verified, ${report.totals.failed} failed, ${report.totals.uncertain} uncertain after ${report.totals.attempts} attempt${report.totals.attempts === 1 ? "" : "s"}.`
+          : `${report.totals.verified} verified, ${report.totals.failed} failed, ${report.totals.uncertain} uncertain after ${report.totals.attempts} attempt${report.totals.attempts === 1 ? "" : "s"}. One failure never discards another page's result.`,
       state: report.status === "complete" ? "pass" : "review",
       reads: observed.calls,
     },
@@ -260,7 +256,9 @@ export async function build() {
         request: { contract: 1, targets: [share, guestbook] },
         scope: "guestbook removed from the reviewed list",
         blocksAt: "authorise",
-        script: "never called",
+        blockedDetail:
+          "Target 2 of 2 is not on the reviewed list, so the runner stops instead of checking target 1 alone.",
+        script: "not called; the request is refused before any read",
       },
       await execute({ targets: [share, guestbook], scope: revoked }),
     ),
@@ -279,7 +277,9 @@ export async function build() {
         },
         scope: "reviewed",
         blocksAt: "deduplicate",
-        script: "never called",
+        blockedDetail:
+          "Target 2 resolves to the same page as target 1, share revision included. Nothing is fetched.",
+        script: "not called; the request is refused before any read",
       },
       await execute({
         targets: [showcase, showcase + "?share=abcdef0123456789"],
