@@ -10,6 +10,7 @@
     "test": "node scripts/identity.mjs && node --experimental-strip-types --test tests/*.test.mjs",
     "test:metadata": "node --experimental-strip-types --test tests/metadata.test.mjs",
     "test:fetch": "node --experimental-strip-types --test tests/fetch.test.mjs",
+    "test:effect": "node --experimental-strip-types --test tests/batch.test.mjs tests/effect-runtime.test.mjs tests/effect-demo.test.mjs",
     "build": "pnpm check:types && wrangler deploy --config wrangler.jsonc --env= --dry-run --outdir dist",
     "deploy": "node scripts/deploy.mjs",
     "test:identity": "node --experimental-strip-types --test tests/identity.test.mjs",

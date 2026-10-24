@@ -1,6 +1,7 @@
 import {health,publish,pageEvent,type PublisherEnv} from "./publisher.mjs";
 import { Effect } from "effect";
 import { inspect, hosts } from "./inspection.ts";
+import { MAX_BODY_BYTES, batchHttp } from "./batch.ts";
 import { sha } from "./build.ts";
 type Env = PublisherEnv & { ASSETS: Fetcher; INSPECTION_LIMIT: RateLimit };
 const json = (data: unknown, status = 200) =>
@@ -11,12 +12,47 @@ const json = (data: unknown, status = 200) =>
       "X-Content-Type-Options": "nosniff",
     },
   });
+// One bounded reader for both inspection routes. A declared length above the
+// limit, a missing body, a read error and a streamed overrun all return null.
+async function readBoundedBody(request: Request, limit: number) {
+  if (Number(request.headers.get("content-length")) > limit) return null;
+  const reader = request.body?.getReader();
+  if (!reader) return null;
+  let size = 0;
+  const chunks: Uint8Array[] = [];
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      size += value.length;
+      if (size > limit) {
+        await reader.cancel();
+        return null;
+      }
+      chunks.push(value);
+    }
+  } catch {
+    return null;
+  } finally {
+    reader.releaseLock();
+  }
+  const bytes = new Uint8Array(size);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.length;
+  }
+  return bytes;
+}
 const app = {
   async fetch(request: Request, env: Env, context: ExecutionContext) {
     const url = new URL(request.url);
     if (
       request.method !== "GET" &&
-      !(url.pathname === "/api/inspect" && request.method === "POST")
+      !(
+        ["/api/inspect", "/api/inspect-batch"].includes(url.pathname) &&
+        request.method === "POST"
+      )
     )
       return json({ error: "Method not supported." }, 405);
     if (url.pathname === "/build.json")
@@ -33,6 +69,39 @@ const app = {
         source: "https://github.com/loftwah/app-composer-linkcheck",
         hosts,
       });
+    if (url.pathname === "/api/inspect-batch") {
+      if (request.method !== "POST")
+        return json(
+          { error: "Send a JSON batch request using POST." },
+          405,
+        );
+      const allowed = await env.INSPECTION_LIMIT.limit({
+        key: "public-batch",
+      });
+      if (!allowed.success)
+        return json(
+          { error: "Inspection capacity reached. Wait one minute and retry." },
+          429,
+        );
+      if (!request.headers.get("content-type")?.startsWith("application/json"))
+        return json({ error: "Use a JSON request body." }, 400);
+      const bytes = await readBoundedBody(request, MAX_BODY_BYTES);
+      if (!bytes)
+        return json(
+          { error: "Send a JSON batch request under 8 KiB." },
+          400,
+        );
+      try {
+        const result = await Effect.runPromise(batchHttp(bytes));
+        return json({ sourceSha: sha, ...result.body }, result.status);
+      } catch {
+        // A defect is a server fault, not a finding about any inspected page.
+        return json(
+          { error: "The batch could not be completed.", kind: "BatchFailed" },
+          500,
+        );
+      }
+    }
     if (url.pathname === "/api/inspect") {
       if (request.method !== "POST")
         return json(
@@ -52,32 +121,8 @@ const app = {
       let value: string;
       let discovery = false;
       try {
-        if (Number(request.headers.get("content-length")) > 4096)
-          throw new Error("size");
-        const reader = request.body?.getReader();
-        if (!reader) throw new Error("empty");
-        let size = 0;
-        const chunks: Uint8Array[] = [];
-        try {
-          for (;;) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            size += value.length;
-            if (size > 4096) {
-              await reader.cancel();
-              throw new Error("size");
-            }
-            chunks.push(value);
-          }
-        } finally {
-          reader.releaseLock();
-        }
-        const bytes = new Uint8Array(size);
-        let offset = 0;
-        for (const chunk of chunks) {
-          bytes.set(chunk, offset);
-          offset += chunk.length;
-        }
+        const bytes = await readBoundedBody(request, 4096);
+        if (!bytes) throw new Error("size");
         const body = JSON.parse(new TextDecoder().decode(bytes));
         if (typeof body?.url !== "string") throw new Error("url");
         value = body.url;

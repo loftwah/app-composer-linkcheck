@@ -10,11 +10,14 @@ Use Node 22, pnpm 12.8.1 and `pnpm install --frozen-lockfile`. TypeScript 6.0.3,
 | `pnpm lint` | TypeScript unused-local/parameter checks over maintained Worker/browser code; this scoped semantic lint is not an ESLint claim. |
 | `pnpm format:check` / `pnpm format` | Check/format the explicit maintained-source and gate list in `scripts/format-source.mjs`. |
 | `pnpm test` | Fictional bounded-fetch, metadata, report/history, UI-data-contract and release-source regressions. |
+| `pnpm test:effect` | Batch runner, timeout/cancellation and recorded-trace regressions with scripted providers. |
 | `pnpm build` | Type/parity gate and credential-free Wrangler dry run using root config/default environment. |
 | `pnpm check` | Types, generated parity, semantic lint, formatting and tests. |
 | `pnpm deploy` | Exact clean pushed main, check/build, final source/identity/config recheck, upload and live verification. |
 
 `src/browser/app.ts` owns inspection/cancellation, report rendering, previews, findings filters, export and copy fallback. `report-format.ts` owns the 64 KiB portable export. `navigation-draft.ts` owns bounded tab-history drafts and report recovery; it never stores HTML or reruns an inspection. `inspection-report.ts` checks the data shapes used by the renderer and its image/link controls. Large valid reports still render/export when the smaller history quota refuses retention; raw relative canonical values remain observed text. `src/publisher.mts` emits its implementation and declaration together, so an unchecked implementation cannot silently drift from its declaration.
+
+`src/batch.ts` owns the bounded multi-page release check: request Schema, reviewed-scope and duplicate admission before any fetch, the `Inspector`/`ReviewedScope` services and their live Layers, per-attempt timeout and interruptible reads, the one-retry transport rule, typed per-page outcomes and the HTTP mapping. Import its schema helpers by name from `effect/Schema`; the namespace form defeats tree-shaking and roughly doubles the Worker bundle. `src/worker.ts` only reads the bounded body, applies the existing rate-limit binding and calls `batchHttp`. `scripts/effect-demo-fixtures.mjs` executes five scripted scenarios and writes `docs/effect/run-trace.json`; `tests/effect-demo.test.mjs` fails if the committed trace no longer matches the runner.
 
 `scripts/source-map.json` maps every emitted output. Edit typed source, run `pnpm source:write`, and commit reviewed source and readable outputs together. Checks compile in memory without changing those committed outputs. The former `node scripts/browser-assets.mjs --check|--write` command remains a compatibility entry into this same complete source gate. Worker globals and DOM globals stay in separate compiler programs.
 

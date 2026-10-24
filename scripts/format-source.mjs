@@ -9,7 +9,12 @@ const files = [
   ...readdirSync(resolve(root, "src/browser"), { recursive: true })
     .filter((file) => /\.(ts|mts)$/.test(file))
     .map((file) => "src/browser/" + file),
+  "src/batch.ts",
   "scripts/deploy.mjs",
+  "scripts/effect-demo-fixtures.mjs",
+  "tests/batch.test.mjs",
+  "tests/effect-runtime.test.mjs",
+  "tests/effect-demo.test.mjs",
   "scripts/browser-assets.mjs",
   "tests/deploy-source.test.mjs",
   "tests/render-report.test.mjs",
