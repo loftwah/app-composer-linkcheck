@@ -154,7 +154,7 @@ const app = {
     headers.set("Referrer-Policy", "no-referrer");
     headers.set(
       "Content-Security-Policy",
-      `default-src 'self'; script-src 'self' 'nonce-${nonce}' https://static.cloudflareinsights.com/beacon.min.js; style-src 'self'; img-src 'self' https://composer.loftwah.com https://guestbook.loftwah.com https://showcase.loftwah.com https://ready.loftwah.com https://ai.loftwah.com https://share.loftwah.com; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'`,
+      `default-src 'self'; script-src 'self' 'nonce-${nonce}' https://static.cloudflareinsights.com/beacon.min.js; style-src 'self'; img-src 'self' ${hosts.map((host) => `https://${host}`).join(" ")}; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'`,
     );
     return new Response(asset.body, { status: asset.status, headers });
   },

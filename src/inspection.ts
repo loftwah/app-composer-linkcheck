@@ -11,6 +11,8 @@ export const hosts = [
   "ready.loftwah.com",
   "ai.loftwah.com",
   "share.loftwah.com",
+  "bubbles.loftwah.com",
+  "fm.loftwah.com",
 ];
 // One whole-inspection budget, covering the page and every dependent asset it
 // declares. Batch attempts apply the same value, so an inspector implementation
