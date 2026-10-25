@@ -176,7 +176,7 @@
             id="url"
             type="url"
             required
-            value="https://composer.loftwah.com/"
+            placeholder="https://example.com/"
             aria-describedby="supported"
           /><button id="submit">Inspect page</button>
         </div>
@@ -191,13 +191,13 @@
           Cancel inspection
         </button>
         <details id="supported">
-          <summary>Supported sites and inspection limits</summary>
+          <summary>Public sites and inspection limits</summary>
           <p>
-            This deployment checks Composer, Here / there, Linkarooie, Hello
-            World, Carry / forward, Link Check, Bubbles (bubbles.loftwah.com) and
-            LoftwahFM (fm.loftwah.com). A fork can configure its own
-            reviewed public hosts. It reads public HTML and bounded image files
-            without executing scripts.
+            Inspect public HTTPS websites, including images hosted on another public domain.
+            Private addresses, credentials and administrative URLs are blocked.
+            Pages that require sign-in, block automated requests or depend entirely
+            on JavaScript may be unavailable. Reads have size, time and rate limits;
+            this tool does not execute page scripts or crawl your site.
           </p>
         </details>
       </form>

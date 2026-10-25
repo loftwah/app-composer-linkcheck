@@ -302,7 +302,7 @@ export async function discoveryChecks(
       status: "review",
       label: "Sitemap document",
       detail:
-        "The optional sitemap could not be inspected within the supported-host/XML/byte limits. An external sitemap declaration is never followed outside the reviewed host list. Missing or unreadable sitemaps do not by themselves prevent indexing.",
+        "The optional sitemap could not be inspected within the public-destination/XML/byte limits. Every sitemap destination uses the same public-network checks. Missing or unreadable sitemaps do not by themselves prevent indexing.",
     });
   }
   return { status: "document-inspection", robots, sitemap, findings };

@@ -1,4 +1,7 @@
 import { Data, Effect, type Duration } from "effect";
+import { InvalidTarget, target } from "./target.ts";
+import { publicFetcher } from "./public-network.ts";
+export { InvalidTarget, target } from "./target.ts";
 import { Parser } from "htmlparser2";
 import { imageSize } from "image-size";
 import { explain, discoveryChecks, imageFindings } from "./diagnostics.ts";
@@ -18,9 +21,6 @@ export const hosts = [
 // declares. Batch attempts apply the same value, so an inspector implementation
 // without its own timeout cannot hang a run.
 export const INSPECTION_TIMEOUT: Duration.Input = "12 seconds";
-export class InvalidTarget extends Data.TaggedError("InvalidTarget")<{
-  message: string;
-}> {}
 export class FetchFailed extends Data.TaggedError("FetchFailed")<{
   message: string;
   // A re-read is safe only when the origin may answer differently: transport
@@ -36,36 +36,11 @@ export class InvalidContent extends Data.TaggedError("InvalidContent")<{
 }> {}
 export type InspectionError =
   InvalidTarget | FetchFailed | TooLarge | InvalidContent;
-export function target(input: string) {
-  let url: URL;
-  try {
-    url = new URL(input);
-  } catch {
-    throw new InvalidTarget({ message: "Enter a complete HTTPS URL." });
-  }
-  if (
-    input.length > 2048 ||
-    url.protocol !== "https:" ||
-    url.port ||
-    url.username ||
-    url.password ||
-    (url.search && !/^\?share=[a-f0-9]{16}$/.test(url.search)) ||
-    url.hash ||
-    !hosts.includes(url.hostname) ||
-    /[\u0000-\u0020\\%]/.test(input) ||
-    /\/(?:_emdash|api|admin|studio|owner|private)(?:\/|$)/i.test(url.pathname)
-  )
-    throw new InvalidTarget({
-      message:
-        "Use a public page on a supported hostname, without credentials, private paths or unrelated query strings.",
-    });
-  return url;
-}
 export async function boundedFetch(
   input: string,
   limit: number,
   signal: AbortSignal,
-  fetcher: typeof fetch = fetch,
+  fetcher: typeof fetch = publicFetcher(),
 ) {
   let url = target(input);
   const redirects: string[] = [];
@@ -527,7 +502,7 @@ export async function identityAssets(
   meta: ReturnType<typeof metadata>,
   pageUrl: string,
   signal: AbortSignal,
-  fetcher: typeof fetch = fetch,
+  fetcher: typeof fetch = publicFetcher(),
 ) {
   const findings: Finding[] = [];
   const icons: ImageReport[] = [];
@@ -714,7 +689,7 @@ export async function identityAssets(
 }
 export function inspect(
   input: string,
-  fetcher: typeof fetch = fetch,
+  fetcher: typeof fetch = publicFetcher(),
   options: { discovery?: boolean; timeout?: Duration.Input } = {},
 ) {
   return Effect.tryPromise({
@@ -784,7 +759,7 @@ export function inspect(
             !dimensions.width ||
             !dimensions.height ||
             dimensions.width > 10000 ||
-            dimensions.height > 10000
+            dimensions.height > 10000 || dimensions.width * dimensions.height > 16_000_000
           )
             throw new InvalidContent({
               message: "Unsupported or excessive image dimensions.",
@@ -902,4 +877,23 @@ export function inspect(
         ),
     }),
   );
+}
+
+// Browser previews receive only inspected raster bytes via a bounded JSON POST.
+// Never return HTML, execute SVG, forward credentials or expose a general proxy.
+export function rasterPreview(input: string, fetcher: typeof fetch = publicFetcher()) {
+  return Effect.tryPromise({
+    try: async (signal) => {
+      const image = await boundedFetch(input, 5 * 1024 * 1024, signal, fetcher);
+      const types: Record<string,string> = {png:'image/png',jpg:'image/jpeg',gif:'image/gif',webp:'image/webp',ico:'image/vnd.microsoft.icon'};
+      const dimensions = imageSize(image.bytes);
+      const type = types[dimensions.type || ''];
+      if (!type || !dimensions.width || !dimensions.height || dimensions.width > 10000 || dimensions.height > 10000 || dimensions.width * dimensions.height > 16_000_000 ||
+          !(image.type === type || (type === 'image/vnd.microsoft.icon' && image.type === 'image/x-icon')))
+        throw new InvalidContent({message:'The preview needs a PNG, JPEG, WebP, GIF or ICO file with matching bytes and bounded dimensions. SVG and HTML are not displayed.'});
+      return {bytes:image.bytes,type};
+    },
+    catch: (error): InspectionError => error instanceof InvalidTarget || error instanceof FetchFailed || error instanceof TooLarge || error instanceof InvalidContent
+      ? error : new InvalidContent({message:'The image preview could not be safely decoded.'}),
+  }).pipe(Effect.timeoutOrElse({duration:INSPECTION_TIMEOUT,orElse:()=>Effect.fail(new FetchFailed({message:'Image preview timed out. Try again when the origin responds.',retryable:true}))}));
 }

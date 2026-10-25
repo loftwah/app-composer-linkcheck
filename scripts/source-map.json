@@ -4,5 +4,7 @@
   "app.js": "public/app.js",
   "report-format.js": "public/report-format.js",
   "navigation-draft.js": "public/navigation-draft.js",
-  "inspection-report.js": "public/inspection-report.js"
+  "inspection-report.js": "public/inspection-report.js",
+  "public-url.js": "public/public-url.js",
+  "preview-images.js": "public/preview-images.js"
 }

@@ -132,7 +132,7 @@ export class ReviewedScope extends Context.Service<
 >()("ReviewedScope") {}
 
 export const InspectorLive = Layer.succeed(Inspector, {
-  inspect: (url, options) => inspect(url, fetch, options),
+  inspect: (url, options) => inspect(url, undefined, options),
 });
 
 export const ReviewedScopeLive = Layer.succeed(ReviewedScope, {
@@ -219,7 +219,7 @@ export function admitTargets(
     for (const [index, input] of request.targets.entries()) {
       // Permission is decided on the parsed hostname before full validation and
       // before any fetch. The scope may narrow the reviewed list, never widen it:
-      // `target` still checks the committed host list and private-path rules.
+      // the operator batch keeps its committed scope; the public web form uses the separate public-DNS policy.
       let parsed: URL | undefined;
       try {
         parsed = new URL(input);
@@ -231,7 +231,8 @@ export function admitTargets(
         parsed.protocol === "https:" &&
         !parsed.username &&
         !parsed.password &&
-        !scope.hosts.includes(parsed.hostname)
+        (!scope.hosts.includes(parsed.hostname) ||
+          !hosts.includes(parsed.hostname))
       )
         return yield* Effect.fail(
           new TargetNotPermitted({

@@ -43,14 +43,14 @@ for (const host of ["bubbles.loftwah.com", "fm.loftwah.com"]) {
         .split(";")
         .find((part) => part.trim().startsWith("img-src "))
         .split(/\s+/)
-        .includes(origin),
+        .includes("blob:"),
     );
   });
 
   test(`${host} does not admit lookalikes, private URLs or external redirects`, async () => {
     for (const url of [
       `https://${host}.evil.test/`,
-      `https://private.${host}/`,
+      `https://${host}.localhost/`,
       `https://u:p@${host}/`,
       `https://${host}/api/private`,
       `https://${host}/?token=secret`,
