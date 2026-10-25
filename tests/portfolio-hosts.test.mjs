@@ -74,3 +74,34 @@ for (const host of ["bubbles.loftwah.com", "fm.loftwah.com"]) {
     assert.equal(calls, 1);
   });
 }
+
+test("LoftwahFM-sized HTML fits while announced and streamed pages over 1 MiB fail", async () => {
+  const origin = "https://fm.loftwah.com/";
+  const report = await Effect.runPromise(
+    inspect(
+      origin,
+      async () =>
+        new Response(
+          "<html><head><title>Large public library</title></head><body>" +
+            " ".repeat(530 * 1024) +
+            "</body></html>",
+          { headers: { "content-type": "text/html" } },
+        ),
+    ),
+  );
+  assert.ok(report.htmlBytes > 512 * 1024);
+  for (const headers of [
+    { "content-type": "text/html" },
+    { "content-type": "text/html", "content-length": String(1024 * 1024 + 1) },
+  ]) {
+    await assert.rejects(
+      Effect.runPromise(
+        inspect(
+          origin,
+          async () => new Response(" ".repeat(1024 * 1024 + 1), { headers }),
+        ),
+      ),
+      (error) => error._tag === "TooLarge",
+    );
+  }
+});

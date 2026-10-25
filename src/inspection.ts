@@ -719,7 +719,7 @@ export function inspect(
 ) {
   return Effect.tryPromise({
     try: async (signal) => {
-      const page = await boundedFetch(input, 512 * 1024, signal, fetcher);
+      const page = await boundedFetch(input, 1024 * 1024, signal, fetcher);
       if (page.type !== "text/html")
         throw new InvalidContent({
           message:
