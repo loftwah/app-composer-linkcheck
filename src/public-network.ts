@@ -68,15 +68,17 @@ export function publicFetcher(transport: typeof fetch = fetch): typeof fetch {
                 `https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(host)}&type=${type}`,
                 {
                   headers: { Accept: "application/dns-json" },
-                  redirect: "error",
+                  redirect: "manual",
                   signal,
                 },
               );
               if (
                 !response.ok ||
                 Number(response.headers.get("content-length")) > DNS_LIMIT
-              )
+              ) {
+                await response.body?.cancel();
                 throw Error("DNS response");
+              }
               const reader = response.body?.getReader();
               if (!reader) throw Error("DNS body");
               const chunks: Uint8Array[] = [];
