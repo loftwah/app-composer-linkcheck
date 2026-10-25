@@ -11,6 +11,8 @@ export const hosts = [
   "ready.loftwah.com",
   "ai.loftwah.com",
   "share.loftwah.com",
+  "bubbles.loftwah.com",
+  "fm.loftwah.com",
 ];
 // One whole-inspection budget, covering the page and every dependent asset it
 // declares. Batch attempts apply the same value, so an inspector implementation
@@ -717,7 +719,7 @@ export function inspect(
 ) {
   return Effect.tryPromise({
     try: async (signal) => {
-      const page = await boundedFetch(input, 512 * 1024, signal, fetcher);
+      const page = await boundedFetch(input, 1024 * 1024, signal, fetcher);
       if (page.type !== "text/html")
         throw new InvalidContent({
           message:
