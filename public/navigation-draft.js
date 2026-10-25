@@ -1,5 +1,6 @@
 // Generated from checked TypeScript; edit src/browser or src/publisher.mts. MIT.
 import { inspectionReport, } from "./inspection-report.js";
+import { publicUrl } from "./public-url.js";
 const property = "composerLinkcheckDraft";
 const record = (value) => Boolean(value) && typeof value === "object" && !Array.isArray(value);
 const text = (value, max = 8192) => typeof value === "string" && value.length <= max;
@@ -23,6 +24,12 @@ function draftText(value) {
         const parsed = new URL(value);
         if (parsed.username || parsed.password)
             return null;
+        try {
+            return publicUrl(value).href;
+        }
+        catch {
+            return null;
+        }
     }
     catch {
         /* Partial draft. */

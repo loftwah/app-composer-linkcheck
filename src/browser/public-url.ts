@@ -52,8 +52,13 @@ export function publicUrl(input: string): URL {
     throw Error(
       "Choose a public page rather than a private, administrative or API path.",
     );
-  for (const key of url.searchParams.keys())
+  for (const key of url.searchParams.keys()) {
+    const normalized = key.replace(/[^a-z0-9]/gi, "").toLowerCase();
     if (
+      /(?:token|password|passwd|passphrase|secret|signature|credentials?|apikey|sessionid)$/.test(
+        normalized,
+      ) ||
+      /^(?:auth|authorization|session|key|code|sig|pwd)$/.test(normalized) ||
       /(?:^|[_-])(?:token|secret|password|passphrase|auth|authorization|session|signature|credential|apikey|api-key|key|code|sig)(?:$|[_-])/i.test(
         key,
       )
@@ -61,5 +66,6 @@ export function publicUrl(input: string): URL {
       throw Error(
         "Remove credentials, access tokens and signed/private query parameters before inspecting a page.",
       );
+  }
   return url;
 }

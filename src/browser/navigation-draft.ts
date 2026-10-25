@@ -2,6 +2,7 @@ import {
   inspectionReport,
   type InspectionReport,
 } from "./inspection-report.js";
+import { publicUrl } from "./public-url.js";
 // MIT. Tab-history recovery for public inspection data. No HTML snapshots,
 // credentials, persistent browser storage, network retries or background work.
 type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
@@ -27,6 +28,11 @@ function draftText(value: unknown): string | null {
   try {
     const parsed = new URL(value);
     if (parsed.username || parsed.password) return null;
+    try {
+      return publicUrl(value).href;
+    } catch {
+      return null;
+    }
   } catch {
     /* Partial draft. */
   }

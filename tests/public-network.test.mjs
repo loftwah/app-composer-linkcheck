@@ -271,3 +271,23 @@ test("preview returns only bounded decoded raster bytes and rejects SVG, HTML an
   );
   assert.equal(throttled.status, 429);
 });
+
+test("common camelCase, signed and encoded credential query names are refused", () => {
+  for (const name of [
+    "accessToken",
+    "authToken",
+    "sessionId",
+    "refreshToken",
+    "clientSecret",
+    "apiKey",
+    "password",
+    "pwd",
+    "X-Amz-Signature",
+    "X-Goog-Credential",
+    "access%54oken",
+  ])
+    assert.throws(
+      () => publicUrl("https://example.com/?" + name + "=private"),
+      name,
+    );
+});
