@@ -13,6 +13,7 @@ const files = [
   "src/public-network.ts",
   "src/target.ts",
   "tests/public-network.test.mjs",
+  "tests/public-worker-runtime.test.mjs",
   "scripts/deploy.mjs",
   "scripts/effect-demo-fixtures.mjs",
   "tests/batch.test.mjs",
