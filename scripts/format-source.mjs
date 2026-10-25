@@ -10,6 +10,9 @@ const files = [
     .filter((file) => /\.(ts|mts)$/.test(file))
     .map((file) => "src/browser/" + file),
   "src/batch.ts",
+  "src/public-network.ts",
+  "src/target.ts",
+  "tests/public-network.test.mjs",
   "scripts/deploy.mjs",
   "scripts/effect-demo-fixtures.mjs",
   "tests/batch.test.mjs",

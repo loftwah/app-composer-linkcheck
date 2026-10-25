@@ -150,8 +150,8 @@ test("effect returns typed network failure without provider bodies", async () =>
   assert.doesNotMatch(result.message, /secret/);
 });
 
- test("only the bounded public share revision query is accepted",async()=>{
-  const accepted="https://composer.loftwah.com/showcase/?share=abcdef0123456789";assert.equal(target(accepted).href,accepted);
-  for(const query of ["?share=secret","?share=abcdef0123456789&token=secret","?share=abcdef0123456789&share=abcdef0123456789","?share=abcdef0123456789abcdef","?share=%61bcdef0123456789"])assert.throws(()=>target("https://composer.loftwah.com/"+query));
+test("public page and CDN queries are accepted while credential queries remain denied",()=>{
+  for(const url of ["https://composer.loftwah.com/showcase/?share=abcdef0123456789","https://example.com/?lang=en","https://cdn.example.com/share.png?w=1200&format=webp"])assert.equal(target(url).href,url);
+  for(const query of ["?token=secret","?share=abcdef0123456789&token=secret","?key=secret"])assert.throws(()=>target("https://composer.loftwah.com/"+query));
   assert.throws(()=>target("https://composer.loftwah.com/api/private?share=abcdef0123456789"));
- });
+});

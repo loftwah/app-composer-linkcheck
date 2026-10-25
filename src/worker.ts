@@ -1,6 +1,6 @@
 import {health,publish,pageEvent,type PublisherEnv} from "./publisher.mjs";
 import { Effect } from "effect";
-import { inspect, hosts } from "./inspection.ts";
+import { inspect, hosts, rasterPreview } from "./inspection.ts";
 import { MAX_BODY_BYTES, batchHttp } from "./batch.ts";
 import { sha } from "./build.ts";
 type Env = PublisherEnv & { ASSETS: Fetcher; INSPECTION_LIMIT: RateLimit };
@@ -50,7 +50,7 @@ const app = {
     if (
       request.method !== "GET" &&
       !(
-        ["/api/inspect", "/api/inspect-batch"].includes(url.pathname) &&
+        ["/api/inspect", "/api/inspect-batch", "/api/preview"].includes(url.pathname) &&
         request.method === "POST"
       )
     )
@@ -65,10 +65,32 @@ const app = {
         dataVersion: 1,
         routes: ["/linkcheck"],
         capabilities: ["page-inspection:read"],
-        configuration: { hosts: { type: "reviewed-source-list" } },
+        configuration: { targets: { type: "public-https-with-public-dns" } },
         source: "https://github.com/loftwah/app-composer-linkcheck",
-        hosts,
+        batchHosts: hosts,
       });
+    if (url.pathname === "/api/preview") {
+      if (request.method !== "POST") return json({error:"Send a JSON image-preview request using POST."},405);
+      const allowed = await env.INSPECTION_LIMIT.limit({key:"public-preview"});
+      if (!allowed.success) return json({error:"Preview capacity reached. Wait one minute and retry."},429);
+      if (!request.headers.get("content-type")?.startsWith("application/json")) return json({error:"Use a JSON request body."},400);
+      let value: string;
+      try {
+        const bytes = await readBoundedBody(request,4096);
+        if (!bytes) throw Error("body");
+        const body = JSON.parse(new TextDecoder().decode(bytes));
+        if (typeof body?.url !== "string") throw Error("url");
+        value = body.url;
+      } catch {return json({error:"Send a JSON URL request under 4 KiB."},400);}
+      return Effect.runPromise(rasterPreview(value).pipe(Effect.match({
+        onSuccess: image => new Response(image.bytes,{headers:{
+          "Content-Type":image.type,"Content-Length":String(image.bytes.length),
+          "Cache-Control":"no-store","X-Content-Type-Options":"nosniff",
+          "Content-Security-Policy":"default-src 'none'; sandbox",
+        }}),
+        onFailure: error => json({error:error.message,kind:error._tag},error._tag === "InvalidTarget" ? 400 : 422),
+      })));
+    }
     if (url.pathname === "/api/inspect-batch") {
       if (request.method !== "POST")
         return json(
@@ -131,7 +153,7 @@ const app = {
         return json({ error: "Send a JSON URL request under 4 KiB." }, 400);
       }
       return Effect.runPromise(
-        inspect(value, fetch, { discovery }).pipe(
+        inspect(value, undefined, { discovery }).pipe(
           Effect.match({
             onSuccess: (report) => {publish(env,context,request,'inspection_completed');return json({ sourceSha: sha, ...report });},
             onFailure: (error) =>
@@ -154,7 +176,7 @@ const app = {
     headers.set("Referrer-Policy", "no-referrer");
     headers.set(
       "Content-Security-Policy",
-      `default-src 'self'; script-src 'self' 'nonce-${nonce}' https://static.cloudflareinsights.com/beacon.min.js; style-src 'self'; img-src 'self' ${hosts.map((host) => `https://${host}`).join(" ")}; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'`,
+      `default-src 'self'; script-src 'self' 'nonce-${nonce}' https://static.cloudflareinsights.com/beacon.min.js; style-src 'self'; img-src 'self' blob:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'`,
     );
     return new Response(asset.body, { status: asset.status, headers });
   },

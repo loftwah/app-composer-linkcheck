@@ -91,3 +91,66 @@ test("history quota and permission failures cannot claim a report was retained",
     else delete globalThis.history;
   }
 });
+
+test("credential query drafts are omitted and fragments are removed before tab-history retention", async () => {
+  const originals = Object.fromEntries(
+    ["history", "document", "window"].map((key) => [
+      key,
+      Object.getOwnPropertyDescriptor(globalThis, key),
+    ]),
+  );
+  const listeners = {};
+  const input = {
+    value: "",
+    addEventListener(type, fn) {
+      listeners[type] = fn;
+    },
+  };
+  const discovery = { checked: false, addEventListener() {} };
+  const history = {
+    state: null,
+    replaceState(value) {
+      this.state = value;
+    },
+  };
+  try {
+    Object.defineProperty(globalThis, "history", {
+      configurable: true,
+      value: history,
+    });
+    Object.defineProperty(globalThis, "document", {
+      configurable: true,
+      value: {
+        querySelector(selector) {
+          return selector === "#url" ? input : discovery;
+        },
+      },
+    });
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: { addEventListener() {} },
+    });
+    await import("../public/navigation-draft.js?public-query-drafts");
+    for (const url of [
+      "https://example.com/?accessToken=private",
+      "https://example.com/?sessionId=private",
+    ]) {
+      input.value = url;
+      listeners.input();
+      assert.equal(history.state.composerLinkcheckDraft.url, "");
+      assert.equal(history.state.composerLinkcheckDraft.draftOmitted, true);
+      assert.doesNotMatch(JSON.stringify(history.state), /private/);
+    }
+    input.value = "https://example.com/page#token=private";
+    listeners.input();
+    assert.equal(
+      history.state.composerLinkcheckDraft.url,
+      "https://example.com/page",
+    );
+  } finally {
+    for (const [key, original] of Object.entries(originals)) {
+      if (original) Object.defineProperty(globalThis, key, original);
+      else delete globalThis[key];
+    }
+  }
+});

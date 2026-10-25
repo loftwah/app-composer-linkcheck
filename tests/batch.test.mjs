@@ -127,12 +127,12 @@ test("a revoked host is 403 and stops the whole batch before the first fetch", a
 });
 
 test("the scope may narrow the reviewed list but never widen it", async () => {
-  const widened = [...hosts, "evil.test"];
-  const { result, state } = await run(request("https://evil.test/page"), {
+  const widened = [...hosts, "example.com"];
+  const { result, state } = await run(request("https://example.com/page"), {
     provider: provider(ok, widened),
   });
   assert.equal(result._tag, "Failure");
-  assert.equal(result.failure._tag, "InvalidTarget");
+  assert.equal(result.failure._tag, "TargetNotPermitted");
   assert.equal(state.calls, 0);
 });
 

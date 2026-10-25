@@ -1,4 +1,5 @@
 // Generated from checked TypeScript; edit src/browser or src/publisher.mts. MIT.
+import { PreviewImages } from "./preview-images.js";
 import { rememberReport, rememberPending, restoredInspection, } from "./navigation-draft.js";
 import { reportJSON } from "./report-format.js";
 import { inspectionReport, } from "./inspection-report.js";
@@ -49,6 +50,7 @@ const elements = {
 function $(selector) {
     return elements[selector];
 }
+const previewImages = new PreviewImages();
 let report;
 let controller;
 let generation = 0;
@@ -97,8 +99,13 @@ function preview() {
     $("#preview-host").textContent = new URL(report.url).hostname;
     $("#preview-image").hidden = search || image?.status !== "verified";
     $("#preview-image").removeAttribute("src");
+    if (search || image?.status !== "verified")
+        void previewImages.set($("#preview-image"));
     if (!$("#preview-image").hidden) {
-        $("#preview-image").src = image.url;
+        void previewImages.set($("#preview-image"), image.url, () => {
+            $("#image-proof").textContent =
+                "The preview could not be loaded. Retry the inspection to try again; the recorded image evidence is retained.";
+        });
         $("#preview-image").alt =
             (x && first("twitter:image")
                 ? first("twitter:image:alt") || "Declared X share image"
@@ -122,8 +129,7 @@ function identity() {
     const icon = data?.icons.find((i) => i.status === "verified" && i.type !== "image/svg+xml");
     $("#site-icon").hidden = !icon;
     $("#site-icon").removeAttribute("src");
-    if (icon)
-        $("#site-icon").src = icon.url;
+    void previewImages.set($("#site-icon"), icon?.url);
     $("#site-title").textContent = report.title || "Untitled page";
     $("#site-host").textContent = new URL(report.url).hostname;
     $("#site-description").textContent =
@@ -162,6 +168,8 @@ function setStatus(text, state) {
 // A failed run must not leave the previous run's numbers in the DOM where a
 // screen reader or a later render could still read them as current.
 function clearReport() {
+    previewImages.clear();
+    $("#site-icon").removeAttribute("src");
     report = undefined;
     $("#report").hidden = true;
     for (const selector of [
@@ -460,4 +468,8 @@ window.addEventListener("pageshow", (event) => {
     $("#submit").textContent = "Inspect page";
     setStatus("The inspection was interrupted when you left. Your URL is retained; inspect again when ready.", "idle");
     rememberPending(false);
+});
+window.addEventListener("pagehide", (event) => {
+    if (!event.persisted)
+        previewImages.clear();
 });
