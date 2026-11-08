@@ -16,6 +16,13 @@ import {
 } from "../src/batch.ts";
 import { FetchFailed, hosts } from "../src/inspection.ts";
 
+const effectVersion = JSON.parse(
+  readFileSync(
+    new URL("../node_modules/effect/package.json", import.meta.url),
+    "utf8",
+  ),
+).version;
+export const EFFECT_VERSION = effectVersion;
 const fixtureUrl = new URL("../docs/effect/run-trace.json", import.meta.url);
 const output = fileURLToPath(fixtureUrl);
 const share = "https://share.loftwah.com/";
@@ -344,7 +351,7 @@ export async function build() {
       module: "src/batch.ts",
       runner: "runBatch",
       tests: "tests/batch.test.mjs",
-      effect: "4.0.4",
+      effect: effectVersion,
       node: "22",
       generatedBy: "scripts/effect-demo-fixtures.mjs",
       label:

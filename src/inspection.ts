@@ -34,8 +34,16 @@ export class TooLarge extends Data.TaggedError("TooLarge")<{
 export class InvalidContent extends Data.TaggedError("InvalidContent")<{
   message: string;
 }> {}
+// An unexpected inspection failure is not a page finding and must not be
+// retried as if the origin might answer differently. Provider text is never
+// echoed; the operator gets a bounded, non-retryable result instead.
+export class UnreadableInspection extends Data.TaggedError(
+  "UnreadableInspection",
+)<{
+  message: string;
+}> {}
 export type InspectionError =
-  InvalidTarget | FetchFailed | TooLarge | InvalidContent;
+  InvalidTarget | FetchFailed | TooLarge | InvalidContent | UnreadableInspection;
 export async function boundedFetch(
   input: string,
   limit: number,
@@ -45,14 +53,33 @@ export async function boundedFetch(
   let url = target(input);
   const redirects: string[] = [];
   for (let hop = 0; hop < 4; hop++) {
-    const response = await fetcher(url.href, {
-      redirect: "manual",
-      signal,
-      headers: {
-        "User-Agent": "AppComposer-LinkCheck/1.0",
-        Accept: "text/html,image/png,image/jpeg,image/webp,image/gif",
-      },
-    });
+    let response: Response;
+    try {
+      response = await fetcher(url.href, {
+        redirect: "manual",
+        signal,
+        headers: {
+          "User-Agent": "AppComposer-LinkCheck/1.0",
+          Accept: "text/html,image/png,image/jpeg,image/webp,image/gif",
+        },
+      });
+    } catch (error) {
+      if (
+        error instanceof InvalidTarget ||
+        error instanceof FetchFailed ||
+        error instanceof TooLarge ||
+        error instanceof InvalidContent ||
+        error instanceof UnreadableInspection
+      )
+        throw error;
+      // A transport rejection is a read failure the operator can retry. The
+      // provider's text is never echoed.
+      throw new FetchFailed({
+        message:
+          "The origin did not answer public requests. Check that the hostname is publicly resolvable, then inspect again.",
+        retryable: true,
+      });
+    }
     if ([301, 302, 303, 307, 308].includes(response.status)) {
       await response.body?.cancel();
       const next = response.headers.get("location");
@@ -110,6 +137,13 @@ export async function boundedFetch(
         }
         chunks.push(value);
       }
+    } catch (error) {
+      if (error instanceof TooLarge) throw error;
+      throw new FetchFailed({
+        message:
+          "The response stream ended before the page could be read. Check that the origin answers public requests, then inspect again.",
+        retryable: true,
+      });
     } finally {
       reader.releaseLock();
     }
@@ -859,10 +893,9 @@ export function inspect(
       error instanceof TooLarge ||
       error instanceof InvalidContent
         ? error
-        : new FetchFailed({
+        : new UnreadableInspection({
             message:
-              "The public response could not be read. Check that the origin answers public requests, then inspect again.",
-            retryable: true,
+              "The response could not be inspected safely within the limits. No provider text is retained.",
           }),
   }).pipe(
     Effect.timeoutOrElse({
@@ -893,7 +926,7 @@ export function rasterPreview(input: string, fetcher: typeof fetch = publicFetch
         throw new InvalidContent({message:'The preview needs a PNG, JPEG, WebP, GIF or ICO file with matching bytes and bounded dimensions. SVG and HTML are not displayed.'});
       return {bytes:image.bytes,type};
     },
-    catch: (error): InspectionError => error instanceof InvalidTarget || error instanceof FetchFailed || error instanceof TooLarge || error instanceof InvalidContent
-      ? error : new InvalidContent({message:'The image preview could not be safely decoded.'}),
+    catch: (error): InspectionError => error instanceof InvalidTarget || error instanceof FetchFailed || error instanceof TooLarge || error instanceof InvalidContent || error instanceof UnreadableInspection
+      ? error : new UnreadableInspection({message:'The image preview could not be safely decoded.'}),
   }).pipe(Effect.timeoutOrElse({duration:INSPECTION_TIMEOUT,orElse:()=>Effect.fail(new FetchFailed({message:'Image preview timed out. Try again when the origin responds.',retryable:true}))}));
 }

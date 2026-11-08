@@ -12,7 +12,12 @@ import {
   runBatch,
   toHttp,
 } from "../src/batch.ts";
-import { FetchFailed, hosts, inspect } from "../src/inspection.ts";
+import {
+  FetchFailed,
+  UnreadableInspection,
+  hosts,
+  inspect,
+} from "../src/inspection.ts";
 import worker from "../src/worker.ts";
 
 const share = "https://share.loftwah.com/";
@@ -345,4 +350,21 @@ test("the Worker route admits methods, capacity and bodies before any inspection
     env(false),
   );
   assert.equal(crowded.status, 429);
+});
+
+test("an unreadable inspection result is uncertain and is not retried", async () => {
+  const { result, state } = await run(request(share), {
+    provider: provider(() =>
+      Effect.fail(
+        new UnreadableInspection({
+          message: "The response could not be inspected safely.",
+        }),
+      ),
+    ),
+  });
+  assert.equal(result._tag, "Success");
+  assert.equal(result.success.targets[0].status, "uncertain");
+  assert.equal(result.success.targets[0].code, "UnreadableResult");
+  assert.equal(result.success.targets[0].attempts, 1);
+  assert.equal(state.calls, 1);
 });

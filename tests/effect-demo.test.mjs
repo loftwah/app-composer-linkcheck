@@ -1,7 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { build, serialise } from "../scripts/effect-demo-fixtures.mjs";
+import {
+  EFFECT_VERSION,
+  build,
+  serialise,
+} from "../scripts/effect-demo-fixtures.mjs";
 
 const committed = readFileSync(
   new URL("../docs/effect/run-trace.json", import.meta.url),
@@ -19,7 +23,7 @@ test("the committed trace is the current batch runner's real output", async () =
 test("every recorded scenario labels itself as executed synthetic evidence", () => {
   const fixture = parse();
   assert.equal(fixture.kind, "effect-batch-trace");
-  assert.equal(fixture.engine.effect, "4.0.4");
+  assert.equal(fixture.engine.effect, EFFECT_VERSION);
   assert.equal(fixture.engine.synthetic, true);
   assert.match(fixture.engine.label, /No network request/);
   assert.equal(fixture.scenarios.length, 5);

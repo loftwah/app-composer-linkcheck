@@ -14,6 +14,7 @@ import {
   InvalidContent,
   InvalidTarget,
   TooLarge,
+  UnreadableInspection,
   hosts,
   inspect,
   target,
@@ -322,6 +323,17 @@ function failureOutcome(
       message: error.message,
       recovery:
         "Inspect a specific page rather than a large response, then run the batch again.",
+      reconciled: false,
+    };
+  if (error instanceof UnreadableInspection)
+    return {
+      target: entry.input,
+      status: "uncertain",
+      attempts,
+      code: "UnreadableResult",
+      message: error.message,
+      recovery:
+        "Run the batch again. If this repeats, inspect the page alone and review the origin.",
       reconciled: false,
     };
   if (error instanceof InvalidTarget)

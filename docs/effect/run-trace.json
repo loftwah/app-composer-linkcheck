@@ -6,7 +6,7 @@
     "module": "src/batch.ts",
     "runner": "runBatch",
     "tests": "tests/batch.test.mjs",
-    "effect": "4.0.4",
+    "effect": "4.1.2",
     "node": "22",
     "generatedBy": "scripts/effect-demo-fixtures.mjs",
     "label": "Recorded by executing the batch runner with scripted inspectors. No network request was made and no result is a live inspection.",
