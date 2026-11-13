@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "packageManager": "pnpm@12.8.1",
+  "packageManager": "pnpm@12.19.0",
   "scripts": {
     "dev": "pnpm source:write && wrangler dev --config wrangler.jsonc --env= --port 4330",
     "check": "pnpm check:types && pnpm lint && pnpm format:check && pnpm test",
@@ -33,6 +33,6 @@
     "prettier": "3.9.10"
   },
   "engines": {
-    "node": ">=22 <23"
+    "node": ">=22.23.5 <23 || >=24.22.3 <25 || >=26.13.1 <27"
   }
 }
