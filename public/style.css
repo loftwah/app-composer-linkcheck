@@ -612,3 +612,21 @@ footer p {
     min-width: 0;
   }
 }
+
+.motion-study {
+  margin-top: 1.25rem;
+}
+.motion-study summary {
+  cursor: pointer;
+}
+.motion-study video {
+  display: block;
+  width: min(100%, 280px);
+  height: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.motion-study a {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
