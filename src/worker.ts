@@ -12,6 +12,92 @@ const json = (data: unknown, status = 200) =>
       "X-Content-Type-Options": "nosniff",
     },
   });
+// Workers static assets return a full 200 for Range requests. Keep this
+// bounded workaround specific to the published film, with no remote fetch.
+async function filmResponse(req: Request, assets: Fetcher): Promise<Response> {
+  const range = req.headers.get("range");
+  const match = range?.match(/^bytes=(\d*)-(\d*)$/);
+  if (req.method !== "GET" || !match || (!match[1] && !match[2]))
+    return assets.fetch(req);
+  const headers = new Headers(req.headers);
+  headers.delete("range");
+  headers.delete("if-range");
+  const full = await assets.fetch(new Request(req, { headers }));
+  if (full.status !== 200) return full;
+  const length = full.headers.get("content-length");
+  const declared = length === null ? null : Number(length);
+  const limit = 2 * 1024 * 1024;
+  // A declared oversized or invalid asset stays on its ordinary full path.
+  if (
+    declared !== null &&
+    (!Number.isSafeInteger(declared) || declared <= 0 || declared > limit)
+  )
+    return full;
+  const ifRange = req.headers.get("if-range");
+  if (ifRange) {
+    const etag = full.headers.get("etag");
+    const modified = full.headers.get("last-modified");
+    const date = Date.parse(ifRange),
+      last = modified ? Date.parse(modified) : NaN;
+    if (
+      !(etag && !etag.startsWith("W/") && ifRange === etag) &&
+      !(Number.isFinite(date) && Number.isFinite(last) && last === date)
+    )
+      return full;
+  }
+  const startNumber = match[1] ? Number(match[1]) : null;
+  const endNumber = match[2] ? Number(match[2]) : null;
+  if (
+    (startNumber !== null && !Number.isSafeInteger(startNumber)) ||
+    (endNumber !== null && !Number.isSafeInteger(endNumber))
+  )
+    return full;
+  if (!full.body) return new Response("Asset unavailable.", { status: 502 });
+  const reader = full.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.byteLength;
+    if (total > limit || (declared !== null && total > declared)) {
+      await reader.cancel();
+      return new Response("Asset length changed.", { status: 502 });
+    }
+    chunks.push(value);
+  }
+  if (total === 0 || (declared !== null && total !== declared))
+    return new Response("Asset length changed.", { status: 502 });
+  const size = total;
+  const start =
+    startNumber === null ? Math.max(0, size - (endNumber ?? 0)) : startNumber;
+  const end =
+    startNumber === null ? size - 1 : Math.min(endNumber ?? size - 1, size - 1);
+  const responseHeaders = new Headers(full.headers);
+  responseHeaders.set("accept-ranges", "bytes");
+  if (
+    start >= size ||
+    start > end ||
+    (startNumber === null && endNumber === 0)
+  ) {
+    responseHeaders.set("content-range", `bytes */${size}`);
+    responseHeaders.delete("content-length");
+    return new Response(null, { status: 416, headers: responseHeaders });
+  }
+  const bytes = new Uint8Array(size);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  responseHeaders.set("content-range", `bytes ${start}-${end}/${size}`);
+  responseHeaders.set("content-length", String(end - start + 1));
+  return new Response(bytes.slice(start, end + 1), {
+    status: 206,
+    headers: responseHeaders,
+  });
+}
+
 // One bounded reader for both inspection routes. A declared length above the
 // limit, a missing body, a read error and a streamed overrun all return null.
 async function readBoundedBody(request: Request, limit: number) {
@@ -165,7 +251,9 @@ const app = {
         ),
       );
     }
-    const asset = await env.ASSETS.fetch(request);
+    const asset = url.pathname === "/brand/icon-inspection-motion.mp4"
+      ? await filmResponse(request, env.ASSETS)
+      : await env.ASSETS.fetch(request);
     const headers = new Headers(asset.headers);
     const nonce = btoa(
       String.fromCharCode(...crypto.getRandomValues(new Uint8Array(16))),
