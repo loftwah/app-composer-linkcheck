@@ -1,6 +1,6 @@
 # Develop Link Check
 
-Use Node 22, pnpm 12.8.1 and `pnpm install --frozen-lockfile`. TypeScript 6.0.3, Wrangler 4.143.1, Prettier 3.9.10 and the existing Effect/parser/image libraries are pinned. No Bun or GitHub Actions are required.
+Use Node 26.13.1 (LTS; Node 22, 24 and 26 are supported) with pnpm 12.21.0 and `pnpm install --frozen-lockfile`. TypeScript 6.0.3 (7.x held: no compiler API, which this app's source gate uses), Wrangler 4.162.0, Prettier 3.10.1, Effect 4.1.4, htmlparser2 12.0.0, image-size 2.1.0 and @cloudflare/workers-types 5.20261115.1 are pinned.  No Bun or GitHub Actions are required.
 
 | Command | Purpose |
 | --- | --- |
