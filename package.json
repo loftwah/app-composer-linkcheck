@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "packageManager": "pnpm@12.19.0",
+  "packageManager": "pnpm@12.21.0",
   "scripts": {
     "dev": "pnpm source:write && wrangler dev --config wrangler.jsonc --env= --port 4330",
     "check": "pnpm check:types && pnpm lint && pnpm format:check && pnpm test",
@@ -22,15 +22,15 @@
     "format": "node scripts/format-source.mjs --write"
   },
   "dependencies": {
-    "effect": "4.1.2",
+    "effect": "4.1.4",
     "htmlparser2": "12.0.0",
-    "image-size": "2.0.4"
+    "image-size": "2.1.0"
   },
   "devDependencies": {
-    "wrangler": "4.158.0",
+    "wrangler": "4.162.0",
     "typescript": "6.0.3",
-    "@cloudflare/workers-types": "5.20261107.1",
-    "prettier": "3.9.10"
+    "@cloudflare/workers-types": "5.20261115.1",
+    "prettier": "3.10.1"
   },
   "engines": {
     "node": ">=22.23.5 <23 || >=24.22.3 <25 || >=26.13.1 <27"

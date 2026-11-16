@@ -4,7 +4,7 @@ Link Check helps you inspect a public page before sharing it: review its site id
 
 [Development commands and checked source ownership](ENGINEERING.md).
 
-Reviewed 13 October 2026. Source: https://github.com/loftwah/app-composer-linkcheck. Launch target: https://share.loftwah.com. Independent Cloudflare Worker with TypeScript, Effect 4.0.4 and native browser UI. App Composer's EmDash owns its catalogue, not this app's runtime. Fonts: Space Grotesk by Florian Karsten, SIL OFL; licence retained.
+Reviewed 13 October 2026; dependency refresh reviewed 17 November 2026. Source: https://github.com/loftwah/app-composer-linkcheck. Launch target: https://share.loftwah.com. Independent Cloudflare Worker with TypeScript 6.0.3, Effect 4.1.4 and native browser UI. App Composer's EmDash owns its catalogue, not this app's runtime. Fonts: Space Grotesk by Florian Karsten, SIL OFL; licence retained.
 
 `pnpm install --frozen-lockfile`, `pnpm dev`, `pnpm check`, `pnpm test:metadata`, `pnpm test:fetch`, `pnpm test:effect`. Tests use fictional fixtures without network writes, including release-boundary failure injection. `pnpm build` produces a real Wrangler bundle. `pnpm deploy` requires clean reviewed pushed main, checks/builds and verifies the exact live commit. No GitHub Actions.
 
