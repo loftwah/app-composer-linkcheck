@@ -4,6 +4,8 @@ Link Check helps you inspect a public page before sharing it: review its site id
 
 [Development commands and checked source ownership](ENGINEERING.md).
 
+Open the [standalone Link Check](https://share.loftwah.com/) at the host root. The `/linkcheck` route in `/manifest.json` is the intended mount when an app host composes Link Check.
+
 Reviewed 13 October 2026; dependency refresh reviewed 17 November 2026. Source: https://github.com/loftwah/app-composer-linkcheck. Launch target: https://share.loftwah.com. Independent Cloudflare Worker with TypeScript 6.0.3, Effect 4.1.4 and native browser UI. App Composer's EmDash owns its catalogue, not this app's runtime. Fonts: Space Grotesk by Florian Karsten, SIL OFL; licence retained.
 
 `pnpm install --frozen-lockfile`, `pnpm dev`, `pnpm check`, `pnpm test:metadata`, `pnpm test:fetch`, `pnpm test:effect`. Tests use fictional fixtures without network writes, including release-boundary failure injection. `pnpm build` produces a real Wrangler bundle. `pnpm deploy` requires clean reviewed pushed main, checks/builds and verifies the exact live commit. No GitHub Actions.
@@ -49,7 +51,7 @@ Copy an agent review, save readable Markdown or export the compatible JSON repor
 
 ## Health and optional usage
 
-Reviewed 14 October 2026. `GET /healthz` (or the declared mount plus `/healthz`) returns public liveness and exact source revision. It does not query storage, inspect credentials or prove a full user journey. `HEAD` is supported; other methods return 405.
+Reviewed 14 October 2026. The standalone `GET /healthz` route returns public liveness and exact source revision. It does not query storage, inspect credentials or prove a full user journey. `HEAD` is supported; other methods return 405.
 
 Optional server-only daily counts use `USAGE_ENDPOINT` (an explicit HTTPS app-scoped endpoint) and `USAGE_TOKEN` (a write-only runtime secret). Both are absent by default, so forks remain independent. The copied MIT publisher derives from App Composer `lib/usage/publisher.mjs`; it is owned and deployable here, without a Composer package or Woodhouse runtime dependency. Failure or a 1.5-second timeout drops a count without blocking the app; there are no retries. Only successful public home-page opens, completed inspections are published. No visitor, URL, referrer, entered text, identity, profile, filename or passphrase is sent. `X-Composer-Verification: 1` excludes synthetic release probes.
 
