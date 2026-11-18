@@ -239,6 +239,8 @@ $("#inspect").addEventListener("submit", async (event) => {
     const current = ++generation;
     controller?.abort();
     controller = new AbortController();
+    // Keep the last successful report so a refused replacement can hand it back.
+    const previous = report;
     $("#cancel").hidden = false;
     $("#submit").disabled = true;
     $("#submit").textContent = "Inspecting…";
@@ -275,12 +277,20 @@ $("#inspect").addEventListener("submit", async (event) => {
             : Error("The inspection failed. Try again.");
         if (current !== generation || leaving)
             return;
-        clearReport();
+        const cancelled = error.name === "AbortError";
         rememberPending(false);
-        setStatus(error.name === "AbortError"
-            ? "Inspection cancelled. Click Inspect page to try again."
-            : error.message, error.name === "AbortError" ? "idle" : "failed");
-        $("#empty").hidden = false;
+        let message = cancelled
+            ? "Inspection cancelled. Use Inspect page to try again."
+            : error.message;
+        if (previous) {
+            renderReport(previous);
+            message += ` The last completed report for ${new URL(previous.url).hostname} is available to export below.`;
+        }
+        else {
+            clearReport();
+            $("#empty").hidden = false;
+        }
+        setStatus(message, cancelled ? "idle" : "failed");
     }
     finally {
         if (current !== generation || leaving)
@@ -429,18 +439,25 @@ $("#markdown").addEventListener("click", () => {
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
 });
+const interruptionMessage = "The inspection was interrupted when you left.";
 const priorInspection = restoredInspection();
 if (priorInspection.report) {
     renderReport(priorInspection.report);
-    setStatus("Restored the previous report in this tab. No inspection was rerun.");
+    const restoredMessage = priorInspection.pending
+        ? `${interruptionMessage} The last completed report is available below.`
+        : "Restored the previous report in this tab. No inspection was rerun.";
+    setStatus(priorInspection.draftOmitted
+        ? `${restoredMessage} The last URL was not retained; enter a public URL without credentials.`
+        : restoredMessage);
 }
-else if (priorInspection.pending) {
-    setStatus("The inspection was interrupted when you left. Your URL is retained; inspect again when ready.", "idle");
-    rememberPending(false);
-}
-if (priorInspection.draftOmitted) {
+else if (priorInspection.draftOmitted) {
     setStatus("That draft could not be retained safely. Enter a public URL without credentials, up to 2048 characters.", "idle");
 }
+else if (priorInspection.pending) {
+    setStatus(`${interruptionMessage} Your URL is retained; inspect again when ready.`, "idle");
+}
+if (priorInspection.pending)
+    rememberPending(false);
 // Mark a real same-tab destination choice before navigation aborts its fetch.
 // A cached return must also release pending UI, without reissuing the request.
 document
@@ -466,7 +483,13 @@ window.addEventListener("pageshow", (event) => {
     $("#cancel").hidden = true;
     $("#submit").disabled = false;
     $("#submit").textContent = "Inspect page";
-    setStatus("The inspection was interrupted when you left. Your URL is retained; inspect again when ready.", "idle");
+    const prior = restoredInspection();
+    if (prior.report)
+        renderReport(prior.report);
+    const recovery = prior.report
+        ? "The last completed report is available below."
+        : "Inspect again when ready.";
+    setStatus(`${interruptionMessage} ${recovery}`, "idle");
     rememberPending(false);
 });
 window.addEventListener("pagehide", (event) => {
