@@ -458,21 +458,31 @@ else if (priorInspection.pending) {
 }
 if (priorInspection.pending)
     rememberPending(false);
-// Mark a real same-tab destination choice before navigation aborts its fetch.
-// A cached return must also release pending UI, without reissuing the request.
-document
-    .querySelector("#app-navigation")
-    .addEventListener("click", (event) => {
-    const link = event.target instanceof Element ? event.target.closest("a") : null;
-    if (!link ||
+// Mark a same-tab departure before the browser aborts the pending request.
+// The footer and launcher are both ways to leave this document.
+document.addEventListener("click", (event) => {
+    if (!$("#submit").disabled ||
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.altKey ||
         event.ctrlKey ||
         event.metaKey ||
-        event.shiftKey ||
-        link.target === "_blank")
+        event.shiftKey)
+        return;
+    const link = event.target instanceof Element
+        ? event.target.closest("a[href]")
+        : null;
+    if (!link ||
+        link.hasAttribute("download") ||
+        (link.target && link.target !== "_self"))
+        return;
+    const destination = new URL(link.href, location.href);
+    if (destination.protocol !== "https:" && destination.protocol !== "http:")
+        return;
+    if (destination.href.split("#")[0] === location.href.split("#")[0])
         return;
     leaving = true;
-    if ($("#submit").disabled)
-        rememberPending(true);
+    rememberPending(true);
 });
 window.addEventListener("pageshow", (event) => {
     leaving = false;
