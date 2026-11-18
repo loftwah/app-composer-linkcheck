@@ -81,13 +81,17 @@ test("the local Apps menu controller is the reviewed Composer distribution with 
   const launcher = readFileSync(new URL("public/brand/launcher.js", root));
   assert.equal(
     createHash("sha256").update(launcher).digest("hex"),
-    "c952399adeb5fc8bfa8f7916222d2c57c1e792b2164807cb9b80592bd520c3cb",
+    "d4ea0de2263a78ffbcec61177b7cc33a98902922ffa917e76404dea323ec60a1",
     "public/brand/launcher.js must be the reviewed Composer distribution",
   );
   const code = launcher.toString("utf8");
   assert.match(
     code,
-    /\{ name: "LDraw", href: "https:\/\/ldraw\.loftwah\.com\/", image: "apps\/ldraw-tile-c9c2339a1296-d2e0dc4b-r2-96\.webp", standaloneOnly: true, explainer: "\/ldraw", description: "Editable diagrams, PNG and SVG", keywords: "draw drawing diagram excalidraw scene png svg local offline" \}/,
+    /\{ name: "LDraw", [^\n]*href: "https:\/\/ldraw\.loftwah\.com\/", image: "apps\/ldraw-tile-fa7a2ab6171c-010cfbd2-r2-96\.webp"/,
+  );
+  assert.match(
+    code,
+    /\{ name: "Edit images", [^\n]*href: "https:\/\/media\.loftwah\.com\/tools\/images"/,
   );
   // The same local controller keeps the documented keyboard and search paths.
   for (const pattern of [
@@ -105,19 +109,19 @@ test("the local Apps menu controller is the reviewed Composer distribution with 
 });
 
 test("the local LDraw tile is the reviewed 96px WebP and no drawn logo was added", () => {
-  const tile = readFileSync(
-    new URL(
-      "public/brand/apps/ldraw-tile-c9c2339a1296-d2e0dc4b-r2-96.webp",
-      root,
-    ),
-  );
-  assert.equal(tile.subarray(0, 4).toString("latin1"), "RIFF");
-  assert.equal(tile.subarray(8, 12).toString("latin1"), "WEBP");
-  assert.equal(
-    createHash("sha256").update(tile).digest("hex"),
-    "eeabb3049de7c9f830a9ded2e40a5014fbcd0fdb7c51373115ba45da2b15748f",
-    "the committed tile must be the reviewed Composer export",
-  );
+  for (const file of [
+    "ldraw-tile-c9c2339a1296-d2e0dc4b-r2-96.webp",
+    "ldraw-tile-fa7a2ab6171c-010cfbd2-r2-96.webp",
+  ]) {
+    const tile = readFileSync(new URL("public/brand/apps/" + file, root));
+    assert.equal(tile.subarray(0, 4).toString("latin1"), "RIFF");
+    assert.equal(tile.subarray(8, 12).toString("latin1"), "WEBP");
+    assert.equal(
+      createHash("sha256").update(tile).digest("hex"),
+      "eeabb3049de7c9f830a9ded2e40a5014fbcd0fdb7c51373115ba45da2b15748f",
+      "the committed tile must be the reviewed Composer export",
+    );
+  }
   for (const path of ["/brand/ldraw", "/brand/apps/ldraw-icon", "ldraw-logo"])
     assert.equal(html.includes(path), false, "no invented LDraw mark " + path);
 });
