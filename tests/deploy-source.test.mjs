@@ -40,9 +40,17 @@ function releaseFixture(action, initialAction = "") {
       '{"id":"fictional-linkcheck","contract":1}',
     );
     writeFileSync(join(workspace, "package.json"), '{"type":"module"}');
-    writeFileSync(join(workspace, ".gitignore"), "dist/\nsrc/build.ts\n");
+    writeFileSync(
+      join(workspace, ".gitignore"),
+      "dist/\nsrc/build.ts\n.release/\n",
+    );
+    mkdirSync(join(workspace, "lib"));
     mkdirSync(join(workspace, "scripts"));
     mkdirSync(join(workspace, "src"));
+    copyFileSync(
+      new URL("../scripts/lib/release-timing.mjs", import.meta.url),
+      join(workspace, "lib/release-timing.mjs"),
+    );
     copyFileSync(
       new URL("../scripts/identity.mjs", import.meta.url),
       join(workspace, "scripts/identity.mjs"),

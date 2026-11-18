@@ -3,6 +3,12 @@ import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { lstatSync, readFileSync, realpathSync } from "node:fs";
 import { resolve } from "node:path";
+import {
+  createGitHubAdapter,
+  createReleaseRun,
+} from "./lib/release-timing.mjs";
+
+const REPO = "loftwah/app-composer-linkcheck";
 const git = (args) => execFileSync("git", args, { encoding: "utf8" }).trim();
 if (git(["status", "--porcelain"]))
   throw new Error("Commit reviewed source before release");
@@ -64,47 +70,117 @@ const unchanged = (withIdentity = true) => {
   }
 };
 unchanged(false);
-execFileSync(process.execPath, ["scripts/identity.mjs"], { stdio: "inherit" });
-unchanged();
-execFileSync("pnpm", ["check"], { stdio: "inherit" });
-execFileSync("pnpm", ["build"], { stdio: "inherit" });
-unchanged();
-execFileSync(
-  "pnpm",
-  [
-    "wrangler",
-    "deploy",
-    "--config",
-    "wrangler.jsonc",
-    "--env=",
-    "--message",
-    "Link Check " + sha,
-  ],
-  { stdio: "inherit" },
-);
-for (let attempt = 0; attempt < 12; attempt++) {
-  const response = await fetch("https://share.loftwah.com/build.json", {
-    cache: "no-store",
-  }).catch(() => null);
-  const data = response?.ok ? await response.json() : null;
-  if (data?.sha === sha) {
-    console.log("Verified exact live Link Check source " + sha);
-    // Assets can briefly 404 while a new deployment propagates to the edge, so
-    // retry the sharing probe instead of failing on a cold edge.
-    let sharingVerified = false;
-    for (let attempt = 0; attempt < 8; attempt++) {
-      try {
-        await verifySharing("https://share.loftwah.com");
-        sharingVerified = true;
-        break;
-      } catch (error) {
-        if (attempt === 7) throw error;
-      }
-      await new Promise((resolve) => setTimeout(resolve, 2500));
-    }
-    if (!sharingVerified) throw new Error("Live sharing card did not converge");
-    process.exit(0);
-  }
-  await new Promise((resolve) => setTimeout(resolve, 1500));
+
+let github = null;
+try {
+  github = createGitHubAdapter({ repo: REPO });
+} catch (error) {
+  console.error(
+    "Delivery SLA alert reporting is unavailable; a redacted pending event will be queued. " +
+      error.message,
+  );
 }
-throw new Error("Deployed identity did not become visible.");
+const release = createReleaseRun({
+  repo: REPO,
+  project: "composer-linkcheck",
+  sha,
+  releasePath: "scripts/deploy.mjs",
+  receiptDir: ".release/timing",
+  firstEditAt: process.env.LINKCHECK_FIRST_EDIT_AT,
+  github,
+});
+await release.flushPending();
+
+const stage = async (name, work) => {
+  const started = performance.now();
+  const result = await release.stage(name, work);
+  console.log(
+    `Release gate passed: ${name} (${((performance.now() - started) / 1000).toFixed(1)}s)`,
+  );
+  return result;
+};
+
+const target = "https://share.loftwah.com";
+let liveRevision = null;
+try {
+  await stage("identity and required checks", () => {
+    execFileSync(process.execPath, ["scripts/identity.mjs"], {
+      stdio: "inherit",
+    });
+    unchanged();
+    execFileSync("pnpm", ["check"], { stdio: "inherit" });
+    execFileSync("pnpm", ["build"], { stdio: "inherit" });
+    unchanged();
+  });
+
+  await stage("worker upload", () =>
+    execFileSync(
+      "pnpm",
+      [
+        "wrangler",
+        "deploy",
+        "--config",
+        "wrangler.jsonc",
+        "--env=",
+        "--message",
+        "Link Check " + sha,
+      ],
+      { stdio: "inherit" },
+    ),
+  );
+
+  liveRevision = await stage("exact live readback and sharing", async () => {
+    for (let attempt = 0; attempt < 12; attempt++) {
+      const response = await fetch("https://share.loftwah.com/build.json", {
+        cache: "no-store",
+      }).catch(() => null);
+      const data = response?.ok ? await response.json() : null;
+      if (data?.sha === sha) {
+        console.log("Verified exact live Link Check source " + sha);
+        // Assets can briefly 404 while a new deployment propagates to the edge, so
+        // retry the sharing probe instead of failing on a cold edge.
+        let sharingVerified = false;
+        for (let attempt = 0; attempt < 8; attempt++) {
+          try {
+            await verifySharing("https://share.loftwah.com");
+            sharingVerified = true;
+            break;
+          } catch (error) {
+            if (attempt === 7) throw error;
+          }
+          await new Promise((resolve) => setTimeout(resolve, 2500));
+        }
+        if (!sharingVerified)
+          throw new Error("Live sharing card did not converge");
+        return data.sha;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+    }
+    throw new Error("Deployed identity did not become visible.");
+  });
+
+  const receipt = await release.finish({
+    status: "passed",
+    target,
+    liveRevision,
+  });
+  console.log(
+    JSON.stringify({
+      sourceSha: sha,
+      target,
+      liveRevision,
+      timing: {
+        status: receipt.status,
+        totalMs: receipt.totalMs,
+        receipt: `.release/timing/receipt-${receipt.runId}.json`,
+      },
+      verified: new Date().toISOString(),
+    }),
+  );
+  console.log(
+    `release ${receipt.status}: ${(receipt.totalMs / 1000).toFixed(1)}s (target ${(receipt.targetMs / 1000).toFixed(0)}s, limit ${(receipt.limitMs / 1000).toFixed(0)}s)`,
+  );
+} catch (error) {
+  await release.fail(error, { target, liveRevision });
+  throw error;
+}

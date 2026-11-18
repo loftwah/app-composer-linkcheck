@@ -1,0 +1,4 @@
+# Kept byte-identical to the canonical release-timing contract (app-composer#624).
+scripts/lib/release-timing.mjs
+scripts/release-watchdog.mjs
+tests/release-timing.test.mjs
