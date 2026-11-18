@@ -179,8 +179,11 @@ export function rememberReport(report: unknown): boolean {
   const stored = update({ report: safe, pending: false });
   return safe !== null && stored;
 }
+// A pending or refused replacement must not discard the last good report.
+// Keeping it in the tab entry lets an interrupted or failed attempt still
+// restore the earlier, truthfully dated inspection and its export.
 export function rememberPending(pending: boolean) {
-  update({ report: null, pending });
+  update({ pending });
 }
 export function restoredInspection(): {
   report: InspectionReport | null;

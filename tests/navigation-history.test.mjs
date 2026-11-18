@@ -92,6 +92,37 @@ test("history quota and permission failures cannot claim a report was retained",
   }
 });
 
+test("a pending or refused replacement keeps the last retained report", async () => {
+  const { rememberReport, rememberPending, restoredInspection } = await import(
+    "../public/navigation-draft.js?pending-keeps-report"
+  );
+  const original = Object.getOwnPropertyDescriptor(globalThis, "history");
+  let state = null;
+  try {
+    Object.defineProperty(globalThis, "history", {
+      configurable: true,
+      value: {
+        get state() {
+          return state;
+        },
+        replaceState(next) {
+          state = structuredClone(next);
+        },
+      },
+    });
+    assert.equal(rememberReport(fixture()), true);
+    rememberPending(true);
+    assert.equal(restoredInspection().report?.url, fixture().url);
+    assert.equal(restoredInspection().pending, true);
+    rememberPending(false);
+    assert.equal(restoredInspection().report?.url, fixture().url);
+    assert.equal(restoredInspection().pending, false);
+  } finally {
+    if (original) Object.defineProperty(globalThis, "history", original);
+    else delete globalThis.history;
+  }
+});
+
 test("credential query drafts are omitted and fragments are removed before tab-history retention", async () => {
   const originals = Object.fromEntries(
     ["history", "document", "window"].map((key) => [
