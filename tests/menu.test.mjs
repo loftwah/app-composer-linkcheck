@@ -81,7 +81,7 @@ test("the local Apps menu controller is the reviewed Composer distribution with 
   const launcher = readFileSync(new URL("public/brand/launcher.js", root));
   assert.equal(
     createHash("sha256").update(launcher).digest("hex"),
-    "d4ea0de2263a78ffbcec61177b7cc33a98902922ffa917e76404dea323ec60a1",
+    "fbc03f8bb08a1a5bd2f7fa397c90dfa0c0fb8a6523618c6bcc65a2c858ab5b4a",
     "public/brand/launcher.js must be the reviewed Composer distribution",
   );
   const code = launcher.toString("utf8");

@@ -93,7 +93,7 @@
         { name: "Fill or sign a PDF", description: "Paperwork: fill fields, draw and sign locally. Files stay in your browser.", keywords: "pdf form fill sign document signature print local paperwork", aliases: ["pdf", "form", "sign", "paperwork", "fill a pdf"], audience: "public", group: "tool", href: "https://composer-paperwork.loftwah.workers.dev/", image: "apps/paperwork-icon-20261024.svg", catalogue: "paperwork" },
         { name: "Review a saved check", description: "Read a saved Link Check report and prepare a bounded agent handoff.", keywords: "review report saved handoff link check findings", aliases: ["review", "report", "handoff", "link check report", "review share report"], audience: "public", group: "tool", path: "/review", icon: "review" },
         // Apps: the remaining shipped catalogue entries, each once.
-        { name: "Media Studio", description: "Read how the studio works and set up your own.", memberDescription: "Open or set up your studio: images, video and sound.", keywords: "media studio images video sound edit project creative", aliases: ["edit media", "studio", "images", "video", "sound"], audience: "public", group: "apps", path: "/media-studio", memberPath: "/media-studio/studio", imagePath: "/media-studio/brand/brand-edit-20261114.png", catalogue: "media-studio" },
+        { name: "Media Studio", description: "Read how the studio works and set up your own.", memberDescription: "Open or set up your studio: images, video and sound.", keywords: "media studio images video sound edit project creative", aliases: ["edit media", "studio", "images", "video", "sound"], audience: "public", group: "apps", path: "/media-studio", memberPath: "/media-studio/studio", image: "apps/media-studio-launcher-20261118.webp", catalogue: "media-studio" },
         { name: "Edit images", description: "Media Studio Image Tools. Resize, crop and convert images on this device.", keywords: "image images workbench resize crop convert inspect photo jpeg png webp local browser", aliases: ["image workbench", "image editor", "edit images", "browser-local image", "image tools", "images", "resize image", "crop image", "convert image"], audience: "public", group: "apps", href: "https://media.loftwah.com/tools/images", icon: "tool" },
         { name: "LDraw", description: "Draw and save editable diagrams locally, then export PNG or SVG.", keywords: "draw drawing diagram excalidraw scene png svg local offline", aliases: ["draw", "diagram", "drawing"], audience: "public", group: "apps", href: "https://ldraw.loftwah.com/", image: "apps/ldraw-tile-fa7a2ab6171c-010cfbd2-r2-96.webp", catalogue: "ldraw" },
         { name: "Here / there", description: "Collect photos and messages, then choose what to publish.", keywords: "photo photos guestbook contribute postcard approve moderation gallery", aliases: ["guestbook", "photos", "postcards", "publish"], audience: "public", group: "apps", path: "/guestbook/", image: "apps/herethere-small-20261018.webp", catalogue: "guestbook" },
@@ -213,9 +213,9 @@
         const link = document.createElement("a");
         link.href = resolveHref(item);
         const description = descriptionFor(item);
-        if (item.image || item.imagePath) {
+        if (item.image) {
             const image = document.createElement("img");
-            image.src = new URL(item.image ?? item.imagePath ?? "", item.image ? assetBase : composerHome).href;
+            image.src = new URL(item.image, assetBase).href;
             image.width = image.height = 40;
             image.alt = "";
             link.append(image);
