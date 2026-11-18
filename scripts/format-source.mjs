@@ -29,6 +29,11 @@ const files = [
   "tsconfig.publisher.json",
   "tsconfig.browser.json",
   "package.json",
+  // The reviewed release-timing/v1 copies stay byte-identical to the canonical
+  // contract, so .prettierignore keeps them out of this explicit list:
+  //   scripts/lib/release-timing.mjs
+  //   scripts/release-watchdog.mjs
+  //   tests/release-timing.test.mjs
 ];
 let failed = false;
 for (const file of files) {
